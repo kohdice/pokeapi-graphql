@@ -16,3 +16,7 @@ graphql_app: GraphQLRouter = GraphQLRouter(schema)
 
 app = FastAPI()
 app.include_router(graphql_app, prefix="/graphql")
+
+
+def sample(x: int, y: int) -> int:
+    return x + y
