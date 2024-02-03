@@ -18,9 +18,9 @@ ENV POETRY_HOME=/opt/poetry
 ENV POETRY_VIRTUALENVS_CREATE=false
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 RUN curl -sSL https://install.python-poetry.org | python - \
-    && cd /usr/local/bin \
-    && ln -s /opt/poetry/bin/poetry \
-    && poetry config virtualenvs.create false
+  && cd /usr/local/bin \
+  && ln -s /opt/poetry/bin/poetry \
+  && poetry config virtualenvs.create false
 
 WORKDIR /app
 
