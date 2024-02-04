@@ -1,0 +1,28 @@
+name: Static code analysis with ruff
+
+run-name: ${{ github.actor }} is running static code analysis with ruff
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  flake8:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Branch Check
+        run: |
+          echo Branch: ${{ github.head_ref }}
+      - name: Run ruff
+        uses: chartboost/ruff-action@v1
+        with:
+          src: "./pokeapi ./tests"
