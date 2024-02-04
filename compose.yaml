@@ -3,6 +3,8 @@ services:
     build:
       context: .
       target: ${TARGET_STAGE:-development}
+    env_file:
+      - .env.${TARGET_STAGE:-development}
     depends_on:
       - db
     ports:

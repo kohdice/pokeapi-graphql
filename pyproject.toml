@@ -10,21 +10,14 @@ python = "^3.11"
 fastapi = "^0.109.0"
 uvicorn = "^0.27.0.post1"
 strawberry-graphql = {extras = ["fastapi"], version = "^0.219.1"}
-sqlalchemy = "^2.0.25"
-pymysql = "^1.1.0"
 alembic = "^1.13.1"
+pymysql = "^1.1.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 
 
 [tool.poetry.group.dev.dependencies]
-flake8 = "^7.0.0"
-flake8-isort = "^6.1.1"
-flake8-bugbear = "^24.1.17"
-flake8-builtins = "^2.2.0"
-flake8-pytest-style = "^1.7.2"
-pep8-naming = "^0.13.3"
+ruff = "^0.2.0"
 mypy = "^1.8.0"
-black = "^24.1.1"
-isort = "^5.13.2"
 pytest = "^8.0.0"
 pytest-mock = "^3.12.0"
 pytest-cov = "^4.1.0"
@@ -32,10 +25,59 @@ taskipy = "^1.12.2"
 debugpy = "^1.8.0"
 
 
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+line-length = 88
+indent-width = 4
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "UP", "B", "SIM", "N", "I"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.mypy]
 show_error_context = true
@@ -46,13 +88,10 @@ no_implicit_optional = true
 warn_return_any = true
 warn_unused_ignores = true
 warn_redundant_casts = true
-
-[tool.black]
-line-length = 100
-
-[tool.isort]
-profile = "black"
-line_length = 100
+plugins = [
+    "strawberry.ext.mypy_plugin",
+    "pydantic.mypy",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -61,14 +100,14 @@ testpaths = ["tests"]
 omit = [
     "tests/*",
     ".venv/*",
+    "migrations/*",
 ]
 
 [tool.taskipy.tasks]
 test = "pytest -s -vv --cov=. --cov-branch --cov-report=html"
-fmt = "task fmt-black && task fmt-isort"
-fmt-black = "black pokeapi tests"
-fmt-isort = "isort pokeapi tests"
-lint = "task lint-black && task lint-flake8 && task lint-mypy"
-lint-flake8 = "flake8 pokeapi tests"
-lint-mypy = "mypy pokeapi tests"
-lint-black = "black --check pokeapi tests"
+fmt = "task fmt-ruff"
+fmt-ruff = "ruff format pokeapi migrations tests"
+lint = "task lint-ruff && task lint-mypy"
+lint-ruff = "ruff check pokeapi migrations tests"
+lint-mypy = "mypy pokeapi migrations tests"
+ruff-fix = "ruff check --diff --fix pokeapi migrations tests"
