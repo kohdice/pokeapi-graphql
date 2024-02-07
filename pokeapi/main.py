@@ -18,5 +18,6 @@ app = FastAPI()
 app.include_router(graphql_app, prefix="/graphql")
 
 
-def sample(x: int, y: int) -> int:
-    return x + y
+@app.get("/health")
+async def health_check() -> dict:
+    return {"status": "OK"}
