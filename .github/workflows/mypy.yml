@@ -40,4 +40,4 @@ jobs:
         with:
           reporter: github-pr-review
           level: warning
-          execute_command: "poetry run mypy"
+          execute_command: "poetry run mypy --exclude migrations"
