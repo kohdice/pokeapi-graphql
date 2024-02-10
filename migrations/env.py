@@ -5,11 +5,11 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from pokeapi.infrastructure.db.models import (
-    ability_mst,  # noqa
-    pokemon_abilities,  # noqa
-    pokemon_mst,  # noqa
-    pokemon_types,  # noqa
-    type_mst,  # noqa
+    ability_mst,  # noqa F401
+    pokemon_abilities,  # noqa F401
+    pokemon_mst,  # noqa F401
+    pokemon_types,  # noqa F401
+    type_mst,  # noqa F401
 )
 from pokeapi.infrastructure.db.models.base import Base
 from pokeapi.infrastructure.db.utils import adjust_connection_url
