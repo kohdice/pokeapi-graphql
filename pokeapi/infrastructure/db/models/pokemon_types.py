@@ -5,7 +5,7 @@ from .base import Base
 from .mixins import TimestampMixin
 
 
-class PokemonTypes(Base, TimestampMixin):
+class PokemonType(Base, TimestampMixin):
     """Class that maps to the `pokemon_types` table."""
 
     __tablename__ = "pokemon_types"
@@ -17,5 +17,5 @@ class PokemonTypes(Base, TimestampMixin):
     slot: Mapped[int] = mapped_column(SmallInteger, nullable=False)
 
     # Relationships
-    pokemon = relationship("PokemonMst", back_populates="pokemon_types")
+    pokemon = relationship("Pokemon", back_populates="pokemon_types")
     type_ = relationship("TypeMst", back_populates="pokemon_types")

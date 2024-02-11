@@ -14,4 +14,4 @@ class TypeMst(Base, TimestampMixin):
     type_: Mapped[str] = mapped_column("type", String(50), nullable=False)
 
     # Relationships
-    pokemon_types = relationship("PokemonTypes", back_populates="type_mst")
+    pokemon_type = relationship("PokemonType", back_populates="type_mst")
