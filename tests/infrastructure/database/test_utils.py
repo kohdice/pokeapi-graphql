@@ -1,6 +1,6 @@
 import pytest
 
-from pokeapi.infrastructure.db.utils import adjust_connection_url
+from pokeapi.infrastructure.database.utils import adjust_connection_url
 
 
 @pytest.mark.parametrize(
