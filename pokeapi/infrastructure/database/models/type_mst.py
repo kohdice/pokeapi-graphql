@@ -1,7 +1,8 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from pokeapi.infrastructure.database.db import Base
+
 from .mixins import TimestampMixin
 
 
@@ -14,4 +15,6 @@ class TypeMst(Base, TimestampMixin):
     type_: Mapped[str] = mapped_column("type", String(50), nullable=False)
 
     # Relationships
-    pokemon_type = relationship("PokemonType", back_populates="type_mst")
+    pokemon_types: Mapped[list["PokemonTypes"]] = relationship(  # noqa: F821
+        "PokemonTypes", back_populates="type_"
+    )

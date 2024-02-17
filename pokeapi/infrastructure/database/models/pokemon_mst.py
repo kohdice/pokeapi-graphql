@@ -1,7 +1,8 @@
 from sqlalchemy import SmallInteger, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from pokeapi.infrastructure.database.db import Base
+
 from .mixins import TimestampMixin
 
 
@@ -22,5 +23,9 @@ class Pokemon(Base, TimestampMixin):
     base_total: Mapped[int] = mapped_column(SmallInteger, nullable=False)
 
     # Relationships
-    type_ = relationship("PokemonType", back_populates="pokemon_mst")
-    ability = relationship("PokemonAbility", back_populates="pokemon_mst")
+    pokemon_types: Mapped[list["PokemonTypes"]] = relationship(  # noqa: F821
+        "PokemonTypes", back_populates="pokemon"
+    )
+    pokemon_abilities: Mapped[list["PokemonAbilities"]] = relationship(  # noqa: F821
+        "PokemonAbilities", back_populates="pokemon"
+    )
