@@ -1,7 +1,8 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from pokeapi.infrastructure.database.db import Base
+
 from .mixins import TimestampMixin
 
 
@@ -14,4 +15,6 @@ class AbilityMst(Base, TimestampMixin):
     ability: Mapped[str] = mapped_column(String(100), nullable=False)
 
     # Relationships
-    pokemon_ability = relationship("PokemonAbility", back_populates="ability_mst")
+    pokemon_abilities: Mapped[list["PokemonAbilities"]] = relationship(  # noqa: F821
+        "PokemonAbilities", back_populates="ability"
+    )

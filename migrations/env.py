@@ -4,6 +4,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from pokeapi.infrastructure.database.db import Base
 from pokeapi.infrastructure.database.models import (
     ability_mst,  # noqa: F401
     pokemon_abilities,  # noqa: F401
@@ -11,7 +12,6 @@ from pokeapi.infrastructure.database.models import (
     pokemon_types,  # noqa: F401
     type_mst,  # noqa: F401
 )
-from pokeapi.infrastructure.database.models.base import Base
 from pokeapi.infrastructure.database.utils import adjust_connection_url
 
 # this is the Alembic Config object, which provides
