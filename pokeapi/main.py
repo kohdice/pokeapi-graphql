@@ -2,16 +2,9 @@ import strawberry
 from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
 
-
-@strawberry.type
-class Query:
-    @strawberry.field
-    def hello(self) -> str:
-        return "Hello World"
-
+from pokeapi.presentation.schemas.query import Query
 
 schema = strawberry.Schema(Query)
-
 graphql_app: GraphQLRouter = GraphQLRouter(schema)
 
 app = FastAPI()
@@ -19,5 +12,5 @@ app.include_router(graphql_app, prefix="/graphql")
 
 
 @app.get("/health")
-async def health_check() -> dict:
+def health_check() -> dict:
     return {"status": "OK"}

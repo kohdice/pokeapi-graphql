@@ -1,0 +1,152 @@
+type query {
+  """Returns a Pokémon resource by ID."""
+  Pokemon(id: ID!): Pokemon
+
+  """List of Pokémon."""
+  pokemos(before: String, after: String, first: Int, last: Int): PokemonConnection!
+}
+
+"""ID used to represent a globally unique identifier."""
+scalar GlobalID
+
+"""Interface for objects with an ID."""
+interface Node {
+  """The ID of an object"""
+  id: GlobalID!
+}
+
+"""Information about pagination within the connection"""
+type PageInfo {
+  """Whether there is a next page in pagination"""
+  hasNextPage: Boolean!
+
+  """Whether there is a previous page in pagination"""
+  hasPreviousPage: Boolean!
+
+  """Cursor to specify continuation for pagination in the forward direction"""
+  startCursor: String
+
+  """Cursor to specify continuation for pagination in the backward direction"""
+  endCursor: String
+}
+
+"""Pokémon"""
+type Pokemon implements Node {
+  """The ID of an object."""
+  id: GlobalID!
+
+  """The National Pokédex number of this Pokémon."""
+  national_pokedex_number: Int!
+
+  """The name of this Pokémon."""
+  name: String!
+
+  """Base stat of HP for this Pokémon."""
+  hp: Int!
+
+  """Base stat of Attack for this Pokémon."""
+  attack: Int!
+
+  """Base stat of Defense for this Pokémon."""
+  defense: Int
+
+  """Base stat of Special Attack for this Pokémon."""
+  specialAttack: Int!
+
+  """Base stat of Special Defense for this Pokémon."""
+  specialDefense: Int!
+
+  """Base stat of Speed for this Pokémon."""
+  speed: Int!
+
+  """Base total of stats for this Pokémon."""
+  baseTotal: Int!
+
+  """Type of this Pokémon."""
+  PokemonsType(before: String, after: String, first: Int, last: Int): PokemonTypeConnection!
+
+  """Ability of this Pokémon."""
+  PokemonsAbility(before: String, after: String, first: Int, last: Int): PokemonAbilityConnection!
+}
+
+"""An edge in a connection."""
+type PokemonEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Pokemon!
+}
+
+"""A connection to a list of items."""
+type PokemonConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [PokemonEdge]!
+}
+
+
+"""Pokémon Type"""
+type PokemonType implements Node {
+  """The ID of an object."""
+  id: GlobalID!
+
+  """Name of this Pokémon type."""
+  typeName: String!
+
+  """Slot of this Pokémon type"""
+  slot: Int!
+}
+
+"""An edge in a connection."""
+type PokemonTypeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: PokemonType!
+}
+
+"""A connection to a list of items."""
+type PokemonTypeConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [PokemonTypesEdge!]!
+}
+
+"""Pokémon Ability"""
+type PokemonAbility implements Node {
+  """The ID of an object."""
+  id: GlobalID!
+
+  """Name of this Pokémon Anility."""
+  abilityName: String!
+
+  """Slot of this Pokémon Ability"""
+  slot: Int!
+
+  """Whether this Pokémon ability is a hidden ability"""
+  isHidden: Boolean!
+}
+
+"""An edge in a connection."""
+type PokemonAbilityEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: PokemonAbility!
+}
+
+"""A connection to a list of items."""
+type PokemonAbilityConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [PokemonAbilitiesEdge!]!
+}

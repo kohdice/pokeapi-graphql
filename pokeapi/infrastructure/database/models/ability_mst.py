@@ -14,4 +14,4 @@ class AbilityMst(Base, TimestampMixin):
     ability: Mapped[str] = mapped_column(String(100), nullable=False)
 
     # Relationships
-    pokemon_abilities = relationship("PokemonAbilities", back_populates="ability_mst")
+    pokemon_ability = relationship("PokemonAbility", back_populates="ability_mst")
