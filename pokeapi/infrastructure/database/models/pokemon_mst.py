@@ -1,8 +1,7 @@
 from sqlalchemy import SmallInteger, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from pokeapi.infrastructure.database.db import Base
-
+from .base import Base
 from .mixins import TimestampMixin
 
 
