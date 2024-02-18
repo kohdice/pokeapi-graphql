@@ -18,9 +18,5 @@ class PokemonTypes(Base, TimestampMixin):
     slot: Mapped[int] = mapped_column(SmallInteger, nullable=False)
 
     # Relationships
-    pokemon: Mapped["Pokemon"] = relationship(  # noqa: F821
-        "Pokemon", back_populates="pokemon_types"
-    )
-    type_: Mapped["TypeMst"] = relationship(  # noqa: F821
-        "TypeMst", back_populates="pokemon_types"
-    )
+    pokemon = relationship("Pokemon", back_populates="pokemon_types")
+    type_ = relationship("TypeMst", back_populates="pokemon_types")

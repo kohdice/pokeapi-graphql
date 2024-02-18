@@ -23,9 +23,5 @@ class Pokemon(Base, TimestampMixin):
     base_total: Mapped[int] = mapped_column(SmallInteger, nullable=False)
 
     # Relationships
-    pokemon_types: Mapped[list["PokemonTypes"]] = relationship(  # noqa: F821
-        "PokemonTypes", back_populates="pokemon"
-    )
-    pokemon_abilities: Mapped[list["PokemonAbilities"]] = relationship(  # noqa: F821
-        "PokemonAbilities", back_populates="pokemon"
-    )
+    pokemon_types = relationship("PokemonTypes", back_populates="pokemon")
+    pokemon_abilities = relationship("PokemonAbilities", back_populates="pokemon")

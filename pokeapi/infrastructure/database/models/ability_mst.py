@@ -15,6 +15,4 @@ class AbilityMst(Base, TimestampMixin):
     ability: Mapped[str] = mapped_column(String(100), nullable=False)
 
     # Relationships
-    pokemon_abilities: Mapped[list["PokemonAbilities"]] = relationship(  # noqa: F821
-        "PokemonAbilities", back_populates="ability"
-    )
+    pokemon_abilities = relationship("PokemonAbilities", back_populates="ability")
