@@ -1,4 +1,4 @@
-from pokeapi.domain.entities.base_entity import BaseEntity
+from pokeapi.domain.entities.base import BaseEntity
 from pokeapi.domain.entities.pokemon_stats import PokemonStats
 from pokeapi.domain.entities.pokemons_ability import PokemonsAbility
 from pokeapi.domain.entities.pokemons_type import PokemonsType
