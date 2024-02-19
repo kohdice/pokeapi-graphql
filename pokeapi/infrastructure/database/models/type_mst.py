@@ -1,11 +1,10 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
-from .mixins import TimestampMixin
+from pokeapi.infrastructure.database.models.base import BaseModel
 
 
-class TypeMst(Base, TimestampMixin):
+class TypeMst(BaseModel):
     """Class that maps to the `type_mst` table."""
 
     __tablename__ = "type_mst"

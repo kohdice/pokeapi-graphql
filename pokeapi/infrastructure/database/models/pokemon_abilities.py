@@ -1,11 +1,10 @@
 from sqlalchemy import Boolean, ForeignKey, SmallInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
-from .mixins import TimestampMixin
+from pokeapi.infrastructure.database.models.base import BaseModel
 
 
-class PokemonAbilities(Base, TimestampMixin):
+class PokemonAbilities(BaseModel):
     """Class that maps to the `pokemon_abilities` table."""
 
     __tablename__ = "pokemon_abilities"
