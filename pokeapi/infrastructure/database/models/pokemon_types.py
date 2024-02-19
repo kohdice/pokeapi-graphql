@@ -1,12 +1,10 @@
 from sqlalchemy import ForeignKey, SmallInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from pokeapi.infrastructure.database.db import Base
-
-from .mixins import TimestampMixin
+from pokeapi.infrastructure.database.models.base import BaseModel
 
 
-class PokemonTypes(Base, TimestampMixin):
+class PokemonTypes(BaseModel):
     """Class that maps to the `pokemon_types` table."""
 
     __tablename__ = "pokemon_types"
@@ -18,9 +16,5 @@ class PokemonTypes(Base, TimestampMixin):
     slot: Mapped[int] = mapped_column(SmallInteger, nullable=False)
 
     # Relationships
-    pokemon: Mapped["Pokemon"] = relationship(  # noqa: F821
-        "Pokemon", back_populates="pokemon_types"
-    )
-    type_: Mapped["TypeMst"] = relationship(  # noqa: F821
-        "TypeMst", back_populates="pokemon_types"
-    )
+    pokemon = relationship("Pokemon", back_populates="pokemon_types")
+    type_ = relationship("TypeMst", back_populates="pokemon_types")

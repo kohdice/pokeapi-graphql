@@ -4,9 +4,9 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from pokeapi.infrastructure.database.db import Base
 from pokeapi.infrastructure.database.models import (
     ability_mst,  # noqa: F401
+    base,
     pokemon_abilities,  # noqa: F401
     pokemon_mst,  # noqa: F401
     pokemon_types,  # noqa: F401
@@ -27,7 +27,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata
+target_metadata = base.BaseModel.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

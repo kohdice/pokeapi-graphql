@@ -1,12 +1,10 @@
 from sqlalchemy import Boolean, ForeignKey, SmallInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from pokeapi.infrastructure.database.db import Base
-
-from .mixins import TimestampMixin
+from pokeapi.infrastructure.database.models.base import BaseModel
 
 
-class PokemonAbilities(Base, TimestampMixin):
+class PokemonAbilities(BaseModel):
     """Class that maps to the `pokemon_abilities` table."""
 
     __tablename__ = "pokemon_abilities"
@@ -21,9 +19,5 @@ class PokemonAbilities(Base, TimestampMixin):
     is_hidden: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
     # Relationships
-    pokemon: Mapped["Pokemon"] = relationship(  # noqa: F821
-        "Pokemon", back_populates="pokemon_abilities"
-    )
-    ability: Mapped["AbilityMst"] = relationship(  # noqa: F821
-        "AbilityMst", back_populates="pokemon_abilities"
-    )
+    pokemon = relationship("Pokemon", back_populates="pokemon_abilities")
+    ability = relationship("AbilityMst", back_populates="pokemon_abilities")

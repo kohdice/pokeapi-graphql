@@ -2,11 +2,10 @@ from typing import NewType
 
 from injector import provider, singleton
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 from pokeapi.infrastructure.database.utils import adjust_connection_url
 
-Base = declarative_base()
 ConnectionUrl = NewType("ConnectionUrl", str)
 
 
