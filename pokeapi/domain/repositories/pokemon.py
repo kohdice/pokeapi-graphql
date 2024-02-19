@@ -29,7 +29,7 @@ class PokemonRepositoryABC(Generic[T, U], ABC):
             db (Session): The database session object used by the repository.
 
         """
-        pass
+        self.__db = db
 
     @abstractmethod
     def _convert_to_entity(self, model: T) -> U:
@@ -45,7 +45,7 @@ class PokemonRepositoryABC(Generic[T, U], ABC):
             U: The converted instance of the domain entity.
 
         """
-        pass
+        ...  # pragma: no cover
 
     @abstractmethod
     def get_by_id(self, id_: int) -> U | None:
@@ -58,7 +58,7 @@ class PokemonRepositoryABC(Generic[T, U], ABC):
             U | None: The entity with the specified identifier, or None if not found.
 
         """
-        pass
+        ...  # pragma: no cover
 
     @abstractmethod
     def get_all(self) -> list | list[U]:
@@ -68,4 +68,4 @@ class PokemonRepositoryABC(Generic[T, U], ABC):
             list | list[U]: A list of all entities in the repository.
 
         """
-        pass
+        ...  # pragma: no cover

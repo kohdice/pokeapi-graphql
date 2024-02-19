@@ -20,7 +20,7 @@ class PokemonRepository(PokemonRepositoryABC[PokemonModel, PokemonEntity]):
 
         """
 
-        self.__db = db
+        super().__init__(db)
 
     def _convert_to_entity(self, model: PokemonModel) -> PokemonEntity:
         """Converts a SQLAlchemy model to a domain entity.
