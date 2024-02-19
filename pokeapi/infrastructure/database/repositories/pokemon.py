@@ -13,11 +13,14 @@ from pokeapi.infrastructure.database.models.pokemon_mst import Pokemon as Pokemo
 
 class PokemonRepository(PokemonRepositoryABC[PokemonModel, PokemonEntity]):
     def __init__(self, db: Session) -> None:
-        self.__db = db
+        """Initializer for PokemonRepository.
 
-    @property
-    def db(self) -> Session:
-        return self.__db
+        Args:
+            db (Session): The database session object used by the repository.
+
+        """
+
+        self.__db = db
 
     def _convert_to_entity(self, model: PokemonModel) -> PokemonEntity:
         """Converts a SQLAlchemy model to a domain entity.
@@ -84,7 +87,7 @@ class PokemonRepository(PokemonRepositoryABC[PokemonModel, PokemonEntity]):
             and_(PokemonModel.id_ == id_, PokemonModel.deleted_at.is_(None))
         )
 
-        result = self.db.execute(statement).scalar()
+        result = self.__db.execute(statement).scalar()
 
         if result is None:
             return None
@@ -95,7 +98,7 @@ class PokemonRepository(PokemonRepositoryABC[PokemonModel, PokemonEntity]):
     def get_all(self) -> list | list[PokemonEntity]:
         statement = select(PokemonModel).where(PokemonModel.deleted_at.is_(None))
 
-        result = self.db.execute(statement).scalars().all()
+        result = self.__db.execute(statement).scalars().all()
 
         if not result:
             return []
