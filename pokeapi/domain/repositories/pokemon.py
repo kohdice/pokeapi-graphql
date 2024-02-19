@@ -29,7 +29,7 @@ class PokemonRepositoryABC(Generic[T, U], ABC):
             db (Session): The database session object used by the repository.
 
         """
-        self.__db = db
+        self._db = db
 
     @abstractmethod
     def _convert_to_entity(self, model: T) -> U:

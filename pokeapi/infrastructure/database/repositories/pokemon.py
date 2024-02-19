@@ -87,7 +87,7 @@ class PokemonRepository(PokemonRepositoryABC[PokemonModel, PokemonEntity]):
             and_(PokemonModel.id_ == id_, PokemonModel.deleted_at.is_(None))
         )
 
-        result = self.__db.execute(statement).scalar()
+        result = self._db.execute(statement).scalar()
 
         if result is None:
             return None
@@ -98,7 +98,7 @@ class PokemonRepository(PokemonRepositoryABC[PokemonModel, PokemonEntity]):
     def get_all(self) -> list | list[PokemonEntity]:
         statement = select(PokemonModel).where(PokemonModel.deleted_at.is_(None))
 
-        result = self.__db.execute(statement).scalars().all()
+        result = self._db.execute(statement).scalars().all()
 
         if not result:
             return []
