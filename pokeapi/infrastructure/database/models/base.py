@@ -1,7 +1,7 @@
 from sqlalchemy.orm import DeclarativeBase
 
-from pokeapi.infrastructure.database.models.mixins import TimestampMixin
 
-
-class BaseModel(DeclarativeBase, TimestampMixin):
+class BaseModel(DeclarativeBase):
     """Base class for all SQLAlchemy models."""
+
+    __abstract__ = True
