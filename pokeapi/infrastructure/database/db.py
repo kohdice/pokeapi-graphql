@@ -1,12 +1,9 @@
-from typing import NewType
-
 from injector import provider, singleton
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from pokeapi.infrastructure.database.utils import adjust_connection_url
-
-ConnectionUrl = NewType("ConnectionUrl", str)
+from pokeapi.settings.config_abc import ConnectionUrl
 
 
 @singleton

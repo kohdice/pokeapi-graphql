@@ -41,7 +41,7 @@ class PokemonRepositoryABC(ABC):
             BaseEntity: The converted instance of the domain entity.
 
         """
-        ...  # pragma: no cover
+        pass  # pragma: no cover
 
     @abstractmethod
     def get_by_id(self, id_: int) -> BaseEntity | None:
@@ -54,7 +54,7 @@ class PokemonRepositoryABC(ABC):
             BaseEntity | None: The entity with the specified identifier, or None if not found.
 
         """
-        ...  # pragma: no cover
+        pass  # pragma: no cover
 
     @abstractmethod
     def get_all(self) -> list | list[BaseEntity]:
@@ -64,4 +64,4 @@ class PokemonRepositoryABC(ABC):
             list | list[BaseEntity]: A list of all entities in the repository.
 
         """
-        ...  # pragma: no cover
+        pass  # pragma: no cover
