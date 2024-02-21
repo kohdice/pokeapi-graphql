@@ -3,15 +3,15 @@ import os
 import pytest
 from pytest_mock import MockFixture
 
+from pokeapi.dependencies.settings.config import AppConfig
 from pokeapi.exceptions.config import (
     InvalidEnvironmentValueError,
     UnsetEnvironmentVariableError,
 )
-from pokeapi.settings.config import AppConfig
 
 
 class TestAppConfig:
-    @pytest.fixture(autouse=True)
+    @pytest.fixture()
     def config(self) -> AppConfig:
         return AppConfig()
 
