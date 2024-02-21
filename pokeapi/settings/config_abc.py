@@ -1,7 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import NewType
-
-ConnectionUrl = NewType("ConnectionUrl", str)
 
 
 class AppConfigABC(ABC):
@@ -26,7 +23,7 @@ class AppConfigABC(ABC):
             str: The stage of the application.
 
         """
-        pass
+        pass  # pragma: no cover
 
     @property
     @abstractmethod
@@ -37,15 +34,15 @@ class AppConfigABC(ABC):
             bool: A boolean indicating whether the application is in debug mode.
 
         """
-        pass
+        pass  # pragma: no cover
 
     @property
     @abstractmethod
-    def database_url(self) -> ConnectionUrl:
+    def database_url(self) -> str:
         """The URL for the database connection.
 
         Returns:
-            ConnectionUrl: The URL for the database connection.
+            str: The URL for the database connection.
 
         """
-        pass
+        pass  # pragma: no cover

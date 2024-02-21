@@ -7,7 +7,7 @@ from pokeapi.exceptions.config import (
     UnsetEnvironmentVariableError,
 )
 
-from .config_abc import AppConfigABC, ConnectionUrl
+from .config_abc import AppConfigABC
 
 
 @singleton
@@ -55,7 +55,7 @@ class AppConfig(AppConfigABC):
         return False
 
     @property
-    def database_url(self) -> ConnectionUrl:
+    def database_url(self) -> str:
         """The URL for the database connection.
 
         Returns:
@@ -69,4 +69,4 @@ class AppConfig(AppConfigABC):
                 "DATABASE_URL environment variable is not set"
             )
 
-        return ConnectionUrl(url)
+        return url
