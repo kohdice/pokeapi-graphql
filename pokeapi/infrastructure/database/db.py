@@ -2,8 +2,8 @@ from injector import provider, singleton
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from pokeapi.dependencies.settings import AppConfig
 from pokeapi.infrastructure.database.utils import adjust_connection_url
-from pokeapi.settings.config import AppConfig
 
 
 @singleton
