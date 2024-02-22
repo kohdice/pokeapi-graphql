@@ -46,7 +46,6 @@ class AppConfig(AppConfigABC):
             bool: A boolean indicating whether the application is in debug mode.
 
         """
-
         env_value = os.getenv("DEBUG")
 
         if env_value is not None:

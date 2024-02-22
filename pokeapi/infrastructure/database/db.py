@@ -16,7 +16,7 @@ def session_factory(config: AppConfig) -> Session:
         config (AppConfig): The application configuration.
 
     Returns:
-        sessionmaker: The session factory.
+        Session: A new session factory.
 
     """
     engine = create_engine(

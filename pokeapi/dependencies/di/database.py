@@ -13,4 +13,11 @@ class DatabaseModule(Module):
     """
 
     def configure(self, binder: Binder) -> None:
+        """Configure the database module.
+
+        Args:
+            binder (Binder): The binder to configure.
+
+        """
+
         binder.bind(Session, to=session_factory, scope=singleton)

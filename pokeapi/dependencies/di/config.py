@@ -11,6 +11,11 @@ class ConfigModule(Module):
     """
 
     def configure(self, binder: Binder) -> None:
-        """Configure the module."""
+        """Configure the module.
+
+        Args:
+            binder (Binder): The binder to configure.
+
+        """
 
         binder.bind(AppConfigABC, to=AppConfig, scope=singleton)  # type: ignore[type-abstract]
