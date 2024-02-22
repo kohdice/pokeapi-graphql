@@ -14,32 +14,32 @@ from pokeapi.infrastructure.database.repositories.pokemon import PokemonReposito
 
 class TestDIContainer:
     @pytest.fixture()
-    def di(self) -> Injector:
+    def dependency_container(self) -> Injector:
         return Injector([ConfigModule(), DatabaseModule(), RepositoryModule()])
 
-    def test_singleton(self, di: Injector) -> None:
-        session_1 = di.get(Session)
-        session_2 = di.get(Session)
+    def test_singleton(self, dependency_container: Injector) -> None:
+        session_1 = dependency_container.get(Session)
+        session_2 = dependency_container.get(Session)
 
         assert session_1 is session_2
 
-        config_1 = di.get(AppConfig)
-        config_2 = di.get(AppConfig)
+        config_1 = dependency_container.get(AppConfig)
+        config_2 = dependency_container.get(AppConfig)
 
         assert config_1 is config_2
 
-        repo_1 = di.get(PokemonRepository)
-        repo_2 = di.get(PokemonRepository)
+        repo_1 = dependency_container.get(PokemonRepository)
+        repo_2 = dependency_container.get(PokemonRepository)
 
         assert repo_1 is repo_2
 
-    def test_di_config(self, di: Injector) -> None:
-        actual = di.get(AppConfig)
+    def test_di_config(self, dependency_container: Injector) -> None:
+        actual = dependency_container.get(AppConfig)
 
         assert actual.stage == "development"
 
-    def test_di_db(self, di: Injector) -> None:
-        session = di.get(Session)
+    def test_di_db(self, dependency_container: Injector) -> None:
+        session = dependency_container.get(Session)
 
         actual = session.execute(
             select(PokemonModel).where(PokemonModel.id_ == 1)
@@ -48,8 +48,8 @@ class TestDIContainer:
         assert isinstance(actual, PokemonModel)
         assert actual.name == "フシギダネ"
 
-    def test_di_pokemon_repo(self, di: Injector) -> None:
-        repo = di.get(PokemonRepository)
+    def test_di_pokemon_repo(self, dependency_container: Injector) -> None:
+        repo = dependency_container.get(PokemonRepository)
         actual_1 = repo.get_by_id(1)
 
         assert isinstance(actual_1, PokemonEntity)

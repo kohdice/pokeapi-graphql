@@ -9,6 +9,8 @@ from pokeapi.exceptions.config import (
     UnsetEnvironmentVariableError,
 )
 
+TEST_DATABASE_URL = "mysql://root:root@db:3306/main_db?charset=utf8"
+
 
 class TestAppConfig:
     @pytest.fixture()
@@ -29,15 +31,14 @@ class TestAppConfig:
     def test_stage(
         self, config: AppConfig, mocker: MockFixture, stage: str, expected: str
     ) -> None:
-        mocker.patch.object(os, "getenv", return_value=stage)
+        mocker.patch("os.getenv", return_value=stage)
 
         assert config.stage == expected
 
-    @pytest.mark.parametrize("stage", ["foo", "bar"])
     def test_stage_with_invalid_value(
-        self, config: AppConfig, mocker: MockFixture, stage: str | None
+        self, config: AppConfig, mocker: MockFixture
     ) -> None:
-        mocker.patch.object(os, "getenv", return_value=stage)
+        mocker.patch("os.getenv", return_value="hoge")
         with pytest.raises(InvalidEnvironmentValueError):
             _ = config.stage
 
@@ -59,24 +60,19 @@ class TestAppConfig:
     def test_debug(
         self, config: AppConfig, mocker: MockFixture, debug: str, expected: bool
     ) -> None:
-        mocker.patch.object(os, "getenv", return_value=debug)
+        mocker.patch("os.getenv", return_value=debug)
 
         assert config.debug is expected
 
-    @pytest.mark.parametrize(
-        "expected", [("mysql://root:root@db:3306/main_db?charset=utf8")]
-    )
-    def test_database_url(
-        self, config: AppConfig, mocker: MockFixture, expected: str
-    ) -> None:
-        mocker.patch.object(os, "getenv", return_value=expected)
+    def test_database_url(self, config: AppConfig, mocker: MockFixture) -> None:
+        mocker.patch("os.getenv", return_value=TEST_DATABASE_URL)
 
-        assert config.database_url == expected
+        assert config.database_url == TEST_DATABASE_URL
 
     def test_database_url_with_error(
         self, config: AppConfig, mocker: MockFixture
     ) -> None:
-        mocker.patch.object(os, "getenv", return_value=None)
+        mocker.patch("os.getenv", return_value=None)
 
         with pytest.raises(UnsetEnvironmentVariableError):
             _ = config.database_url

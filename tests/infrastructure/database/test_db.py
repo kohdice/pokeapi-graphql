@@ -8,12 +8,12 @@ from pokeapi.infrastructure.database.models.pokemon_mst import Pokemon
 
 
 @pytest.fixture(scope="module")
-def di() -> Injector:
+def dependency_container() -> Injector:
     return Injector([ConfigModule()])
 
 
-def test_session_factory(di: Injector) -> None:
-    session = session_factory(di.get(AppConfig))
+def test_session_factory(dependency_container: Injector) -> None:
+    session = session_factory(dependency_container.get(AppConfig))
     actual = session.get(Pokemon, 1)
 
     assert actual is not None

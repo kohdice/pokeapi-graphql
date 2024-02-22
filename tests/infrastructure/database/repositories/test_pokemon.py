@@ -1,8 +1,8 @@
-import os
-
 import pytest
+from injector import Injector
 from pytest_mock import MockFixture
 from sqlalchemy import ScalarResult
+from sqlalchemy.orm import Session
 
 from pokeapi.domain.entities.pokemon import Pokemon as PokemonEntity
 from pokeapi.domain.entities.pokemon_ability import PokemonAbility
@@ -10,7 +10,6 @@ from pokeapi.domain.entities.pokemon_stats import PokemonStats
 from pokeapi.domain.entities.pokemon_type import PokemonType
 from pokeapi.domain.entities.pokemons_ability import PokemonsAbility
 from pokeapi.domain.entities.pokemons_type import PokemonsType
-from pokeapi.infrastructure.database.db import ConnectionUrl, session_factory
 from pokeapi.infrastructure.database.models.ability_mst import AbilityMst
 from pokeapi.infrastructure.database.models.pokemon_abilities import PokemonAbilities
 from pokeapi.infrastructure.database.models.pokemon_mst import Pokemon as PokemonModel
@@ -115,53 +114,31 @@ TEST_ENTITY = PokemonEntity(
 )
 
 
+@pytest.fixture(scope="module")
+def repo(dependency_container: Injector) -> PokemonRepository:
+    session = dependency_container.get(Session)
+
+    return PokemonRepository(session)
+
+
 class TestPokemonRepository:
-    CONNECTION_URL = ConnectionUrl(os.environ["DATABASE_URL"])
+    def test_convert_to_entity(self, repo: PokemonRepository) -> None:
+        assert repo._convert_to_entity(TEST_MODEL) == TEST_ENTITY
 
-    @pytest.mark.parametrize(("model", "expected"), [(TEST_MODEL, TEST_ENTITY)])
-    def test_convert_to_entity(
-        self, model: PokemonModel, expected: PokemonEntity
-    ) -> None:
-        session = session_factory(self.CONNECTION_URL)
-        with session() as s:
-            repo = PokemonRepository(s)
-            actual = repo._convert_to_entity(model)
+    def test_get_by_id(self, repo: PokemonRepository) -> None:
+        assert repo.get_by_id(1) == TEST_ENTITY
 
-            assert actual == expected
+    def test_get_by_id_not_found(self, repo: PokemonRepository) -> None:
+        assert repo.get_by_id(0) is None
 
-    @pytest.mark.parametrize("expected", [TEST_ENTITY])
-    def test_get_by_id(self, expected: PokemonEntity) -> None:
-        session = session_factory(self.CONNECTION_URL)
-        with session() as s:
-            repo = PokemonRepository(s)
-            actual = repo.get_by_id(1)
+    def test_get_all(self, repo: PokemonRepository) -> None:
+        actual = repo.get_all()
 
-            assert actual == expected
+        assert actual
+        assert len(actual) == 151
+        assert actual[0] == TEST_ENTITY
 
-    def test_get_by_id_not_found(self) -> None:
-        session = session_factory(self.CONNECTION_URL)
-        with session() as s:
-            repo = PokemonRepository(s)
-            actual = repo.get_by_id(0)
-
-            assert actual is None
-
-    @pytest.mark.parametrize("expected", [TEST_ENTITY])
-    def test_get_all(self, expected: PokemonEntity) -> None:
-        session = session_factory(self.CONNECTION_URL)
-        with session() as s:
-            repo = PokemonRepository(s)
-            actual = repo.get_all()
-
-            assert actual
-            assert len(actual) == 151
-            assert actual[0] == expected
-
-    def test_get_all_empty(self, mocker: MockFixture) -> None:
+    def test_get_all_empty(self, repo: PokemonRepository, mocker: MockFixture) -> None:
         mocker.patch.object(ScalarResult, "all", return_value=[])
-        session = session_factory(self.CONNECTION_URL)
-        with session() as s:
-            repo = PokemonRepository(s)
-            actual = repo.get_all()
 
-            assert actual == []
+        assert repo.get_all() == []
