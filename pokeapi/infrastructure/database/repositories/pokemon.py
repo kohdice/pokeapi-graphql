@@ -104,7 +104,6 @@ class PokemonRepository(PokemonRepositoryABC):
 
         if result is None:
             return None
-        print(f"created at: {result.created_at}")
 
         return self._convert_to_entity(result)
 
