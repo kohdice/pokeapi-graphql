@@ -20,7 +20,7 @@ class PokemonAbility(relay.Node):
     @classmethod
     def resolve_node(
         cls, node_id: str, *, info: Info | None = None, required: bool = False
-    ):
+    ) -> "PokemonAbility":
         """Resolve Pokémon Ability.
 
         Args:

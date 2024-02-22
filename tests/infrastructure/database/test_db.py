@@ -1,15 +1,20 @@
-import os
+import pytest
+from injector import Injector
 
-from pokeapi.infrastructure.database.db import ConnectionUrl, session_factory
+from pokeapi.dependencies.di.config import ConfigModule
+from pokeapi.dependencies.settings.config import AppConfig
+from pokeapi.infrastructure.database.db import session_factory
 from pokeapi.infrastructure.database.models.pokemon_mst import Pokemon
 
 
-def test_session_factory() -> None:
-    url = ConnectionUrl(os.environ["DATABASE_URL"])
-    session = session_factory(url)
+@pytest.fixture(scope="module")
+def dependency_container() -> Injector:
+    return Injector([ConfigModule()])
 
-    with session() as s:
-        actual = s.get(Pokemon, 1)
 
-        assert actual is not None
-        assert actual.name == "フシギダネ"
+def test_session_factory(dependency_container: Injector) -> None:
+    session = session_factory(dependency_container.get(AppConfig))
+    actual = session.get(Pokemon, 1)
+
+    assert actual is not None
+    assert actual.name == "フシギダネ"

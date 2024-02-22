@@ -108,6 +108,9 @@ testpaths = ["tests"]
 [tool.coverage.run]
 omit = ["tests/*", ".venv/*", "migrations/*"]
 
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
+
 [tool.taskipy.tasks]
 test = "pytest -s -vv --cov=. --cov-branch --cov-report=html"
 fmt = "task fmt-sort && task fmt-ruff"

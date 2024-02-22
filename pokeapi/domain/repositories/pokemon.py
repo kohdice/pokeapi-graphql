@@ -1,16 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
 
 from sqlalchemy.orm import Session
 
 from pokeapi.domain.entities.base import BaseEntity
 from pokeapi.infrastructure.database.models.base import BaseModel
 
-T = TypeVar("T", bound=BaseModel)
-U = TypeVar("U", bound=BaseEntity)
 
-
-class PokemonRepositoryABC(Generic[T, U], ABC):
+class PokemonRepositoryABC(ABC):
     """Abstract base class for sample repositories.
 
     This class defines the interface for pokemon repositories. Concrete implementations
@@ -32,40 +28,40 @@ class PokemonRepositoryABC(Generic[T, U], ABC):
         self._db = db
 
     @abstractmethod
-    def _convert_to_entity(self, model: T) -> U:
+    def _convert_to_entity(self, model: BaseModel) -> BaseEntity:
         """Converts a SQLAlchemy model to a domain entity.
 
         This method converts a SQLAlchemy model instance to a corresponding domain entity
         instance.
 
         Args:
-            model (T): The SQLAlchemy model instance to be converted.
+            model (BaseModel): The SQLAlchemy model instance to be converted.
 
         Returns:
-            U: The converted instance of the domain entity.
+            BaseEntity: The converted instance of the domain entity.
 
         """
-        ...  # pragma: no cover
+        pass  # pragma: no cover
 
     @abstractmethod
-    def get_by_id(self, id_: int) -> U | None:
+    def get_by_id(self, id_: int) -> BaseEntity | None:
         """Retrieve an entity by its identifier.
 
         Args:
             id_ (int): The identifier of the entity to retrieve.
 
         Returns:
-            U | None: The entity with the specified identifier, or None if not found.
+            BaseEntity | None: The entity with the specified identifier, or None if not found.
 
         """
-        ...  # pragma: no cover
+        pass  # pragma: no cover
 
     @abstractmethod
-    def get_all(self) -> list | list[U]:
+    def get_all(self) -> list | list[BaseEntity]:
         """Retrieve all entities from the repository.
 
         Returns:
-            list | list[U]: A list of all entities in the repository.
+            list | list[BaseEntity]: A list of all entities in the repository.
 
         """
-        ...  # pragma: no cover
+        pass  # pragma: no cover

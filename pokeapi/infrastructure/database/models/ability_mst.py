@@ -1,10 +1,18 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from pokeapi.infrastructure.database.models.base import BaseModel
+from .base import BaseModel
+from .mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from .pokemon_abilities import PokemonAbilities
 
 
-class AbilityMst(BaseModel):
+class AbilityMst(BaseModel, TimestampMixin):
     """Class that maps to the `ability_mst` table."""
 
     __tablename__ = "ability_mst"
@@ -13,4 +21,6 @@ class AbilityMst(BaseModel):
     ability: Mapped[str] = mapped_column(String(100), nullable=False)
 
     # Relationships
-    pokemon_abilities = relationship("PokemonAbilities", back_populates="ability")
+    pokemon_abilities: Mapped[list[PokemonAbilities]] = relationship(
+        "PokemonAbilities", back_populates="ability"
+    )

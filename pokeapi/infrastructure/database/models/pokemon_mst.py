@@ -1,10 +1,19 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from sqlalchemy import SmallInteger, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from pokeapi.infrastructure.database.models.base import BaseModel
+from .base import BaseModel
+from .mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from .pokemon_abilities import PokemonAbilities
+    from .pokemon_types import PokemonTypes
 
 
-class Pokemon(BaseModel):
+class Pokemon(BaseModel, TimestampMixin):
     """Class that maps to the `pokemon_mst` table."""
 
     __tablename__ = "pokemon_mst"
@@ -21,5 +30,9 @@ class Pokemon(BaseModel):
     base_total: Mapped[int] = mapped_column(SmallInteger, nullable=False)
 
     # Relationships
-    pokemon_types = relationship("PokemonTypes", back_populates="pokemon")
-    pokemon_abilities = relationship("PokemonAbilities", back_populates="pokemon")
+    pokemon_types: Mapped[list[PokemonTypes]] = relationship(
+        "PokemonTypes", back_populates="pokemon"
+    )
+    pokemon_abilities: Mapped[list[PokemonAbilities]] = relationship(
+        "PokemonAbilities", back_populates="pokemon"
+    )

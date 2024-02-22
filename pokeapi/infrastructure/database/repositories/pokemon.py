@@ -1,3 +1,4 @@
+from injector import inject, singleton
 from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
@@ -11,7 +12,19 @@ from pokeapi.domain.repositories.pokemon import PokemonRepositoryABC
 from pokeapi.infrastructure.database.models.pokemon_mst import Pokemon as PokemonModel
 
 
-class PokemonRepository(PokemonRepositoryABC[PokemonModel, PokemonEntity]):
+@singleton
+class PokemonRepository(PokemonRepositoryABC):
+    """A repository class for handling Pokemon data.
+
+    This class extends the abstract base class PokemonRepositoryABC and implements
+    methods to interact with the database.
+
+    Args:
+        db (Session): The database session to be used by the repository.
+
+    """
+
+    @inject
     def __init__(self, db: Session) -> None:
         """Initializer for PokemonRepository.
 
@@ -22,7 +35,7 @@ class PokemonRepository(PokemonRepositoryABC[PokemonModel, PokemonEntity]):
 
         super().__init__(db)
 
-    def _convert_to_entity(self, model: PokemonModel) -> PokemonEntity:
+    def _convert_to_entity(self, model: PokemonModel) -> PokemonEntity:  # type: ignore[override]
         """Converts a SQLAlchemy model to a domain entity.
 
         This method converts a SQLAlchemy model instance to a corresponding domain entity
@@ -91,7 +104,6 @@ class PokemonRepository(PokemonRepositoryABC[PokemonModel, PokemonEntity]):
 
         if result is None:
             return None
-        print(f"created at: {result.created_at}")
 
         return self._convert_to_entity(result)
 

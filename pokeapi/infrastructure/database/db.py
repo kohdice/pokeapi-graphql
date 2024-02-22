@@ -1,26 +1,28 @@
-from typing import NewType
-
-from injector import provider, singleton
+from injector import inject, provider, singleton
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from pokeapi.dependencies.settings.config import AppConfig
 from pokeapi.infrastructure.database.utils import adjust_connection_url
-
-ConnectionUrl = NewType("ConnectionUrl", str)
 
 
 @singleton
+@inject
 @provider
-def session_factory(connection_url: ConnectionUrl) -> sessionmaker[Session]:
+def session_factory(config: AppConfig) -> Session:
     """Create a new session factory.
 
     Args:
-        connection_url (ConnectionUrl): The connection URL.
+        config (AppConfig): The application configuration.
 
     Returns:
-        sessionmaker: The session factory.
+        Session: A new session factory.
 
     """
-    engine = create_engine(adjust_connection_url(connection_url), echo=True)
+    engine = create_engine(
+        adjust_connection_url(config.database_url), echo=config.debug
+    )
+    session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
-    return sessionmaker(bind=engine, autocommit=False, autoflush=False)
+    with session_local() as session:
+        return session
