@@ -53,13 +53,13 @@ class Pokemon(relay.Node):
 
     @classmethod
     def resolve_node(
-        cls, node_id: str, *, info: Info | None = None, required: bool = False
-    ):
+        cls, node_id: str, *, info: Info, required: bool = False
+    ) -> "Pokemon":
         """Resolve Pokémon by node_id.
 
         Args:
             node_id (str): The unique identifier for the Pokémon.
-            info (Info, optional): Information about the execution of the query.
+            info (Info): Information about the execution of the query.
             required (bool, optional): Whether the node is required.
 
         Returns:
