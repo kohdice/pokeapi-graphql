@@ -1,7 +1,6 @@
-from injector import Module, provider, singleton
+from injector import Binder, Module, singleton
 from sqlalchemy.orm import Session
 
-from pokeapi.dependencies.settings import AppConfig
 from pokeapi.infrastructure.database.db import session_factory
 
 
@@ -13,24 +12,5 @@ class DatabaseModule(Module):
 
     """
 
-    @singleton
-    @provider
-    def provide_db_session(self, config: AppConfig) -> Session:
-        """Provides the database session for the application.
-
-            This method provides the database session for the application as a dependency.
-
-        Args:
-            config (AppConfig): The application configuration.
-
-        Returns:
-            Session: The database session for the application.
-
-        """
-        session_local = session_factory(config)
-        session = session_local()
-
-        try:
-            return session
-        finally:
-            session.close()
+    def configure(self, binder: Binder) -> None:
+        binder.bind(Session, to=session_factory, scope=singleton)
