@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from pytest_mock import MockFixture
+from pytest_mock import MockerFixture
 
 from pokeapi.dependencies.settings.config import AppConfig
 from pokeapi.exceptions.config import (
@@ -29,20 +29,20 @@ class TestAppConfig:
         ],
     )
     def test_stage(
-        self, config: AppConfig, mocker: MockFixture, stage: str, expected: str
+        self, config: AppConfig, mocker: MockerFixture, stage: str, expected: str
     ) -> None:
         mocker.patch("os.getenv", return_value=stage)
 
         assert config.stage == expected
 
     def test_stage_with_invalid_value(
-        self, config: AppConfig, mocker: MockFixture
+        self, config: AppConfig, mocker: MockerFixture
     ) -> None:
         mocker.patch("os.getenv", return_value="hoge")
         with pytest.raises(InvalidEnvironmentValueError):
             _ = config.stage
 
-    def test_stage_with_none(self, config: AppConfig, mocker: MockFixture) -> None:
+    def test_stage_with_none(self, config: AppConfig, mocker: MockerFixture) -> None:
         mocker.patch.object(os, "getenv", return_value=None)
         with pytest.raises(UnsetEnvironmentVariableError):
             _ = config.stage
@@ -58,19 +58,19 @@ class TestAppConfig:
         ],
     )
     def test_debug(
-        self, config: AppConfig, mocker: MockFixture, debug: str, expected: bool
+        self, config: AppConfig, mocker: MockerFixture, debug: str, expected: bool
     ) -> None:
         mocker.patch("os.getenv", return_value=debug)
 
         assert config.debug is expected
 
-    def test_database_url(self, config: AppConfig, mocker: MockFixture) -> None:
+    def test_database_url(self, config: AppConfig, mocker: MockerFixture) -> None:
         mocker.patch("os.getenv", return_value=TEST_DATABASE_URL)
 
         assert config.database_url == TEST_DATABASE_URL
 
     def test_database_url_with_error(
-        self, config: AppConfig, mocker: MockFixture
+        self, config: AppConfig, mocker: MockerFixture
     ) -> None:
         mocker.patch("os.getenv", return_value=None)
 
