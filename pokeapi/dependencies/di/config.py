@@ -17,5 +17,4 @@ class ConfigModule(Module):
             binder (Binder): The binder to configure.
 
         """
-
         binder.bind(AppConfigABC, to=AppConfig, scope=singleton)  # type: ignore[type-abstract]
