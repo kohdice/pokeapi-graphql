@@ -32,8 +32,7 @@ class PokemonRepository(PokemonRepositoryABC):
             db (Session): The database session object used by the repository.
 
         """
-
-        super().__init__(db)
+        self._db = db
 
     def _convert_to_entity(self, model: PokemonModel) -> PokemonEntity:  # type: ignore[override]
         """Converts a SQLAlchemy model to a domain entity.
@@ -108,6 +107,12 @@ class PokemonRepository(PokemonRepositoryABC):
         return self._convert_to_entity(result)
 
     def get_all(self) -> list | list[PokemonEntity]:
+        """Retrieve all Pokémon.
+
+        Returns:
+            list | list[PokemonEntity]: A list of all Pokémon.
+
+        """
         statement = select(PokemonModel).where(PokemonModel.deleted_at.is_(None))
 
         result = self._db.execute(statement).scalars().all()

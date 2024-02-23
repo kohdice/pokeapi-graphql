@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy.orm import Session
-
 from pokeapi.domain.entities.base import BaseEntity
 from pokeapi.infrastructure.database.models.base import BaseModel
 
@@ -12,20 +10,7 @@ class PokemonRepositoryABC(ABC):
     This class defines the interface for pokemon repositories. Concrete implementations
     should inherit from this class and provide implementations for the abstract methods.
 
-    Attributes:
-        db (Session): The database session object used by the repository.
-
     """
-
-    @abstractmethod
-    def __init__(self, db: Session) -> None:
-        """Initializer for PokemonRepository.
-
-        Args:
-            db (Session): The database session object used by the repository.
-
-        """
-        self._db = db
 
     @abstractmethod
     def _convert_to_entity(self, model: BaseModel) -> BaseEntity:
