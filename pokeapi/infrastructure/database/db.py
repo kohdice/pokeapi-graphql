@@ -16,7 +16,7 @@ def session_factory(config: AppConfig) -> Session:
         config (AppConfig): The application configuration.
 
     Returns:
-        scoped_session[Session]: The session factory.
+        Session: The session factory.
 
     """
     engine = create_engine(
