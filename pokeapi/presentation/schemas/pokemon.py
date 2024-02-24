@@ -3,6 +3,7 @@ from strawberry import relay
 from strawberry.types import Info
 
 from pokeapi.application.services.pokemon_abc import PokemonServiceABC
+from pokeapi.domain.entities.pokemon import Pokemon as PokemonEntity
 from pokeapi.exceptions.pokemon import PokemonNotFoundError
 from pokeapi.presentation.schemas.pokemon_ability import PokemonAbility
 from pokeapi.presentation.schemas.pokemon_type import PokemonType
@@ -56,30 +57,16 @@ class Pokemon(relay.Node):
     )
 
     @classmethod
-    def resolve_node(
-        cls, node_id: str, *, info: Info, required: bool = False
-    ) -> "Pokemon":
-        """Resolve Pokémon by node_id.
+    def from_entity(cls, entity: PokemonEntity) -> "Pokemon":
+        """Create a Pokémon schema from a Pokémon entity.
 
         Args:
-            node_id (str): The unique identifier for the Pokémon.
-            info (Info): Information about the execution of the query.
-            required (bool, optional): Whether the node is required.
+            entity (PokemonEntity): The Pokémon entity.
 
         Returns:
-            Pokemon: The Pokémon.
-
-        Raises:
-            PokemonNotFoundError: If the Pokémon is not found.
+            Pokemon: The Pokémon schema.
 
         """
-        container = info.context["container"]
-        service = container.get(PokemonServiceABC)
-        entity = service.get_by_id(int(node_id))
-
-        if entity is None:
-            raise PokemonNotFoundError("Pokemon not found")
-
         types = [
             PokemonsType(
                 pokemon_type=PokemonType(
@@ -89,7 +76,6 @@ class Pokemon(relay.Node):
             )
             for type_ in entity.pokemons_type
         ]
-
         abilities = [
             PokemonsAbility(
                 pokemon_ability=PokemonAbility(
@@ -101,8 +87,7 @@ class Pokemon(relay.Node):
             )
             for ability in entity.pokemons_ability
         ]
-
-        return Pokemon(
+        return cls(
             id=entity.id_,
             national_pokedex_number=entity.national_pokedex_number,
             name=entity.name,
@@ -116,3 +101,30 @@ class Pokemon(relay.Node):
             types=types,
             abilities=abilities,
         )
+
+    @classmethod
+    def resolve_node(
+        cls, node_id: str, *, info: Info, required: bool = False
+    ) -> "Pokemon":
+        """Resolve Pokémon by node_id.
+
+        Args:
+            node_id (str): The unique identifier for the Pokémon.
+            info (Info): Information about the execution of the query.
+            required (bool, optional): Whether the node is required.
+
+        Returns:
+            Pokemon: The Pokémon schema.
+
+        Raises:
+            PokemonNotFoundError: If the Pokémon is not found.
+
+        """
+        container = info.context["container"]
+        service = container.get(PokemonServiceABC)
+        entity = service.get_by_id(int(node_id))
+
+        if entity is None:
+            raise PokemonNotFoundError("Pokemon not found")
+
+        return cls.from_entity(entity)
