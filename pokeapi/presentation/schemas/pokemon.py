@@ -1,9 +1,9 @@
-from collections.abc import Iterable
-
 import strawberry
 from strawberry import relay
 from strawberry.types import Info
 
+from pokeapi.application.services.pokemon_abc import PokemonServiceABC
+from pokeapi.exceptions.pokemon import PokemonNotFoundError
 from pokeapi.presentation.schemas.pokemon_ability import PokemonAbility
 from pokeapi.presentation.schemas.pokemon_type import PokemonType
 from pokeapi.presentation.schemas.pokemons_ability import PokemonsAbility
@@ -50,6 +50,10 @@ class Pokemon(relay.Node):
     base_total: int = strawberry.field(
         description="Base total of stats for this Pokémon."
     )
+    types: list[PokemonsType] = strawberry.field(description="Type of Pokémon's Type")
+    abilities: list[PokemonsAbility] = strawberry.field(
+        description="Ability of Pokémon's Ability"
+    )
 
     @classmethod
     def resolve_node(
@@ -65,60 +69,50 @@ class Pokemon(relay.Node):
         Returns:
             Pokemon: The Pokémon.
 
+        Raises:
+            PokemonNotFoundError: If the Pokémon is not found.
+
         """
+        container = info.context["container"]
+        service = container.get(PokemonServiceABC)
+        entity = service.get_by_id(int(node_id))
+
+        if entity is None:
+            raise PokemonNotFoundError("Pokemon not found")
+
+        types = [
+            PokemonsType(
+                pokemon_type=PokemonType(
+                    id=type_.pokemon_type.id_, type_name=type_.pokemon_type.name
+                ),
+                slot=type_.slot,
+            )
+            for type_ in entity.pokemons_type
+        ]
+
+        abilities = [
+            PokemonsAbility(
+                pokemon_ability=PokemonAbility(
+                    id=ability.pokemon_ability.id_,
+                    ability_name=ability.pokemon_ability.name,
+                ),
+                slot=ability.slot,
+                is_hidden=ability.is_hidden,
+            )
+            for ability in entity.pokemons_ability
+        ]
+
         return Pokemon(
-            id=1,
-            national_pokedex_number=1,
-            name="フシギダネ",
-            hp=45,
-            attack=49,
-            defense=49,
-            special_attack=65,
-            special_defense=65,
-            speed=54,
-            base_total=318,
+            id=entity.id_,
+            national_pokedex_number=entity.national_pokedex_number,
+            name=entity.name,
+            hp=entity.stats.hp,
+            attack=entity.stats.attack,
+            defense=entity.stats.defense,
+            special_attack=entity.stats.special_attack,
+            special_defense=entity.stats.special_defense,
+            speed=entity.stats.speed,
+            base_total=entity.stats.base_total,
+            types=types,
+            abilities=abilities,
         )
-
-    @relay.connection(
-        relay.ListConnection[PokemonsType], description="Type of this Pokémon."
-    )
-    def pokemons_type(self) -> Iterable[PokemonsType]:
-        """Return the type of this Pokémon.
-
-        Returns:
-            Iterable[PokemonsType]: Type of this Pokémon.
-
-        """
-        return [
-            PokemonsType(
-                id="1-5", pokemon_type=PokemonType(id=5, type_name="くさ"), slot=1
-            ),
-            PokemonsType(
-                id="1-8", pokemon_type=PokemonType(id=8, type_name="どく"), slot=2
-            ),
-        ]
-
-    @relay.connection(
-        relay.ListConnection[PokemonsAbility], description="Ability of this Pokémon."
-    )
-    def pokemons_ability(self) -> Iterable[PokemonsAbility]:
-        """Return the ability of this Pokémon.
-
-        Returns:
-            Iterable[PokemonsAbility]: Ability of this Pokémon.
-
-        """
-        return [
-            PokemonsAbility(
-                id="1-65",
-                pokemon_ability=PokemonAbility(id=65, ability_name="しんりょく"),
-                slot=1,
-                is_hidden=False,
-            ),
-            PokemonsAbility(
-                id="1-34",
-                pokemon_ability=PokemonAbility(id=34, ability_name="ようりょくそ"),
-                slot=3,
-                is_hidden=True,
-            ),
-        ]
