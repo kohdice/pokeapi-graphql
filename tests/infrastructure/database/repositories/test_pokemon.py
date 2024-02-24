@@ -138,7 +138,9 @@ class TestPokemonRepository:
         assert len(actual) == 151
         assert actual[0] == TEST_ENTITY
 
-    def test_get_all_empty(self, repo: PokemonRepository, mocker: MockerFixture) -> None:
+    def test_get_all_empty(
+        self, repo: PokemonRepository, mocker: MockerFixture
+    ) -> None:
         mocker.patch.object(ScalarResult, "all", return_value=[])
 
         assert repo.get_all() == []
