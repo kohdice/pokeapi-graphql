@@ -1,6 +1,6 @@
 from injector import inject, provider, singleton
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
 from pokeapi.dependencies.settings.config import AppConfig
 from pokeapi.infrastructure.database.utils import adjust_connection_url
@@ -16,13 +16,16 @@ def session_factory(config: AppConfig) -> Session:
         config (AppConfig): The application configuration.
 
     Returns:
-        Session: A new session factory.
+        Session: The session factory.
 
     """
     engine = create_engine(
         adjust_connection_url(config.database_url), echo=config.debug
     )
-    session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+
+    session_local = scoped_session(
+        sessionmaker(bind=engine, autocommit=False, autoflush=False)
+    )
 
     with session_local() as session:
         return session

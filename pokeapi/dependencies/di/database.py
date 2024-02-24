@@ -19,5 +19,4 @@ class DatabaseModule(Module):
             binder (Binder): The binder to configure.
 
         """
-
         binder.bind(Session, to=session_factory, scope=singleton)
