@@ -32,9 +32,11 @@ RUN poetry install --no-interaction --no-root
 
 COPY . .
 
+RUN chmod +x /app/docker-entrypoint.sh
+
 EXPOSE 8000
 
-CMD uvicorn 'pokeapi.main:app' --host=0.0.0.0 --port=8000 --reload
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # Production image
 FROM base AS production
