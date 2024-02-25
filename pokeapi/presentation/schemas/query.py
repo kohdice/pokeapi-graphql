@@ -6,6 +6,7 @@ from strawberry.types.info import Info
 
 from pokeapi.application.services.pokemon_abc import PokemonServiceABC
 from pokeapi.presentation.schemas.pokemon import Pokemon
+from pokeapi.presentation.schemas.pokemon_ability import PokemonAbility
 from pokeapi.presentation.schemas.pokemon_type import PokemonType
 
 
@@ -23,6 +24,9 @@ class Query:
     pokemon: Pokemon = relay.node(description="Returns a Pokémon resource by ID.")
     pokemon_type: PokemonType = relay.node(
         description="Returns a Pokémon Type resource by ID."
+    )
+    pokemon_ability: PokemonAbility = relay.node(
+        description="Returns a Pokémon Ability resource by ID."
     )
 
     # TODO: Fix test it.
