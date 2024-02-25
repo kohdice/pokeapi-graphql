@@ -3,6 +3,7 @@ from injector import Binder, Injector, singleton
 
 from pokeapi.domain.entities.base import BaseEntity
 from pokeapi.domain.repositories.pokemon import PokemonRepositoryABC
+from pokeapi.domain.repositories.pokemon_ability import AbilityRepositoryABC
 from pokeapi.domain.repositories.pokemon_type import TypeRepositoryABC
 from pokeapi.infrastructure.database.models import BaseModel
 
@@ -12,7 +13,7 @@ class MockEntity(BaseEntity):
     name: str
 
 
-class MockRepository(PokemonRepositoryABC, TypeRepositoryABC):
+class MockRepository(PokemonRepositoryABC, TypeRepositoryABC, AbilityRepositoryABC):
     def _convert_to_entity(self, model: BaseModel) -> BaseEntity:
         return BaseEntity()
 
@@ -34,5 +35,6 @@ def dependency_container() -> Injector:
     def configure(binder: Binder) -> None:
         binder.bind(PokemonRepositoryABC, to=MockRepository, scope=singleton)  # type: ignore[type-abstract]
         binder.bind(TypeRepositoryABC, to=MockRepository, scope=singleton)  # type: ignore[type-abstract]
+        binder.bind(AbilityRepositoryABC, to=MockRepository, scope=singleton)  # type: ignore[type-abstract]
 
     return Injector(configure)
