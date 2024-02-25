@@ -5,6 +5,7 @@ from injector import Binder, Injector, singleton
 from starlette.responses import Response
 
 from pokeapi.application.services.pokemon_abc import PokemonServiceABC
+from pokeapi.application.services.pokemon_type_abc import TypeServiceABC
 from pokeapi.domain.entities.base import BaseEntity
 
 
@@ -97,6 +98,25 @@ class MockPokemonService(PokemonServiceABC):
         ]
 
 
+class MockPokemonTypeEntity(BaseEntity):
+    id_: int
+    name: str
+
+
+class MockPokemonTypeService(TypeServiceABC):
+    def get_by_id(self, id_: int) -> MockPokemonTypeEntity | None:
+        if id_ < 1:
+            return None
+
+        return MockPokemonTypeEntity(id_=id_, name=f"mock_{id_}")
+
+    def get_all(self) -> list[MockPokemonTypeEntity]:  # type: ignore[override]
+        return [
+            MockPokemonTypeEntity(id_=1, name="mock_1"),
+            MockPokemonTypeEntity(id_=2, name="mock_2"),
+        ]
+
+
 class MockRequest:
     pass
 
@@ -110,6 +130,7 @@ class MockInfo:
 def dependency_container() -> Injector:
     def configure(binder: Binder) -> None:
         binder.bind(PokemonServiceABC, to=MockPokemonService, scope=singleton)  # type: ignore[type-abstract]
+        binder.bind(TypeServiceABC, to=MockPokemonTypeService, scope=singleton)  # type: ignore[type-abstract]
 
     return Injector(configure)
 
