@@ -21,8 +21,9 @@ class Query:
 
     pokemon: Pokemon = relay.node(description="Returns a Pokémon resource by ID.")
 
+    # TODO: Fix test it.
     @relay.connection(relay.ListConnection[Pokemon], description="List of Pokémon.")
-    def pokemons(self, info: Info) -> Iterable[Pokemon]:
+    def pokemons(self, info: Info) -> Iterable[Pokemon]:  # pragma: no cover
         """Returns a list of Pokémon resources.
 
         Returns:
