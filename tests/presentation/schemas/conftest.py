@@ -5,6 +5,7 @@ from injector import Binder, Injector, singleton
 from starlette.responses import Response
 
 from pokeapi.application.services.pokemon_abc import PokemonServiceABC
+from pokeapi.application.services.pokemon_ability_abc import AbilityServiceABC
 from pokeapi.application.services.pokemon_type_abc import TypeServiceABC
 from pokeapi.domain.entities.base import BaseEntity
 
@@ -19,7 +20,7 @@ class MockStats(BaseEntity):
     base_total: int
 
 
-class MockEntity(BaseEntity):
+class MockPokemonEntity(BaseEntity):
     id_: int
     national_pokedex_number: int
     name: str
@@ -49,7 +50,7 @@ class MockAbilities(BaseEntity):
     is_hidden: bool
 
 
-def create_entity(id_: int) -> MockEntity:
+def create_entity(id_: int) -> MockPokemonEntity:
     stats = MockStats(
         hp=id_,
         attack=id_,
@@ -74,7 +75,7 @@ def create_entity(id_: int) -> MockEntity:
         for ability, is_hidden in [(id_, False), (id_ + 1, True)]
     )
 
-    return MockEntity(
+    return MockPokemonEntity(
         id_=id_,
         national_pokedex_number=id_,
         name=f"mock_{id_}",
@@ -85,35 +86,35 @@ def create_entity(id_: int) -> MockEntity:
 
 
 class MockPokemonService(PokemonServiceABC):
-    def get_by_id(self, id_: int) -> MockEntity | None:
+    def get_by_id(self, id_: int) -> MockPokemonEntity | None:
         if id_ < 1:
             return None
 
         return create_entity(id_)
 
-    def get_all(self) -> list[MockEntity]:  # type: ignore[override]
+    def get_all(self) -> list[MockPokemonEntity]:  # type: ignore[override]
         return [
             create_entity(1),
             create_entity(2),
         ]
 
 
-class MockPokemonTypeEntity(BaseEntity):
+class MockEntity(BaseEntity):
     id_: int
     name: str
 
 
-class MockPokemonTypeService(TypeServiceABC):
-    def get_by_id(self, id_: int) -> MockPokemonTypeEntity | None:
+class MockService(TypeServiceABC, AbilityServiceABC):
+    def get_by_id(self, id_: int) -> MockEntity | None:
         if id_ < 1:
             return None
 
-        return MockPokemonTypeEntity(id_=id_, name=f"mock_{id_}")
+        return MockEntity(id_=id_, name=f"mock_{id_}")
 
-    def get_all(self) -> list[MockPokemonTypeEntity]:  # type: ignore[override]
+    def get_all(self) -> list[MockEntity]:  # type: ignore[override]
         return [
-            MockPokemonTypeEntity(id_=1, name="mock_1"),
-            MockPokemonTypeEntity(id_=2, name="mock_2"),
+            MockEntity(id_=1, name="mock_1"),
+            MockEntity(id_=2, name="mock_2"),
         ]
 
 
@@ -130,7 +131,8 @@ class MockInfo:
 def dependency_container() -> Injector:
     def configure(binder: Binder) -> None:
         binder.bind(PokemonServiceABC, to=MockPokemonService, scope=singleton)  # type: ignore[type-abstract]
-        binder.bind(TypeServiceABC, to=MockPokemonTypeService, scope=singleton)  # type: ignore[type-abstract]
+        binder.bind(TypeServiceABC, to=MockService, scope=singleton)  # type: ignore[type-abstract]
+        binder.bind(AbilityServiceABC, to=MockService, scope=singleton)  # type: ignore[type-abstract]
 
     return Injector(configure)
 
