@@ -25,11 +25,11 @@ class PokemonServiceABC(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_all(self) -> list | list[BaseEntity]:
-        """Retrieve all pokemon from the repository.
+    def get_all(self) -> list[BaseEntity]:
+        """Retrieve all Pokémon from the repository.
 
         Returns:
-            list | list[BaseEntity]: A list of all Pokémon in the repository.
+            list[BaseEntity]: A list of all Pokémon in the repository.
 
         """
         pass  # pragma: no cover

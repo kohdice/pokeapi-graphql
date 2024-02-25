@@ -2,6 +2,10 @@ import strawberry
 from strawberry import relay
 from strawberry.types import Info
 
+from pokeapi.application.services.pokemon_type_abc import TypeServiceABC
+from pokeapi.domain.entities.pokemon_type import PokemonType as PokemonTypeEntity
+from pokeapi.exceptions.pokemon_type import TypeNotFoundError
+
 
 @strawberry.type
 class PokemonType(relay.Node):
@@ -16,10 +20,22 @@ class PokemonType(relay.Node):
     id: relay.NodeID[int]
     type_name: str = strawberry.field(description="Name of this Type.")
 
-    # TODO: Enable returning data retrieved from the database using the node_id.
+    @classmethod
+    def from_entity(cls, entity: PokemonTypeEntity) -> "PokemonType":
+        """Create a Pokémon Type from a Pokémon Type entity.
+
+        Args:
+            entity: The Pokémon Type entity.
+
+        Returns:
+            PokemonType: A Pokémon Type.
+
+        """
+        return PokemonType(id=entity.id_, type_name=entity.name)
+
     @classmethod
     def resolve_node(
-        cls, node_id: str, *, info: Info | None = None, required: bool = False
+        cls, node_id: str, *, info: Info, required: bool = False
     ) -> "PokemonType":
         """Resolve Pokémon Type.
 
@@ -31,5 +47,15 @@ class PokemonType(relay.Node):
         Returns:
             PokemonType: The Pokémon Type.
 
+        Raises:
+            TypeNotFoundError: If the Pokémon Type is not found.
+
         """
-        return PokemonType(id=1, type_name="ノーマル")
+        container = info.context["container"]
+        service = container.get(TypeServiceABC)
+        entity = service.get_by_id(int(node_id))
+
+        if entity is None:
+            raise TypeNotFoundError("Type not found")
+
+        return cls.from_entity(entity)

@@ -2,6 +2,10 @@ from injector import Binder, Module, singleton
 
 from pokeapi.application.services.pokemon import PokemonService
 from pokeapi.application.services.pokemon_abc import PokemonServiceABC
+from pokeapi.application.services.pokemon_ability import AbilityService
+from pokeapi.application.services.pokemon_ability_abc import AbilityServiceABC
+from pokeapi.application.services.pokemon_type import TypeService
+from pokeapi.application.services.pokemon_type_abc import TypeServiceABC
 
 
 class ServiceModule(Module):
@@ -19,3 +23,5 @@ class ServiceModule(Module):
 
         """
         binder.bind(PokemonServiceABC, to=PokemonService, scope=singleton)  # type: ignore[type-abstract]
+        binder.bind(TypeServiceABC, to=TypeService, scope=singleton)  # type: ignore[type-abstract]
+        binder.bind(AbilityServiceABC, to=AbilityService, scope=singleton)  # type: ignore[type-abstract]

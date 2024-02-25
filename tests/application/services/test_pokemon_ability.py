@@ -2,29 +2,29 @@ import pytest
 from injector import Injector
 from pytest_mock import MockerFixture
 
-from pokeapi.application.services.pokemon import PokemonService
+from pokeapi.application.services.pokemon_ability import AbilityService
 from pokeapi.domain.entities.base import BaseEntity
-from pokeapi.domain.repositories.pokemon import PokemonRepositoryABC
+from pokeapi.domain.repositories.pokemon_ability import AbilityRepositoryABC
 
 
 @pytest.fixture()
-def service(dependency_container: Injector) -> PokemonService:
-    repo = dependency_container.get(PokemonRepositoryABC)  # type: ignore[type-abstract]
+def service(dependency_container: Injector) -> AbilityService:
+    repo = dependency_container.get(AbilityRepositoryABC)  # type: ignore[type-abstract]
 
-    return PokemonService(repo)
+    return AbilityService(repo)
 
 
-class TestPokemonService:
+class TestAbilityService:
     @pytest.mark.parametrize("id_", [1, 2])
-    def test_get_by_id(self, service: PokemonService, id_: int) -> None:
+    def test_get_by_id(self, service: AbilityService, id_: int) -> None:
         actual = service.get_by_id(id_)
 
         assert isinstance(actual, BaseEntity)
 
-    def test_get_by_id_not_found(self, service: PokemonService) -> None:
+    def test_get_by_id_not_found(self, service: AbilityService) -> None:
         assert service.get_by_id(0) is None
 
-    def test_get_all(self, service: PokemonService) -> None:
+    def test_get_all(self, service: AbilityService) -> None:
         actual = service.get_all()
 
         assert len(actual) == 2
@@ -32,7 +32,7 @@ class TestPokemonService:
         assert isinstance(actual[1], BaseEntity)
 
     def test_get_all_empty(
-        self, service: PokemonService, mocker: MockerFixture
+        self, service: AbilityService, mocker: MockerFixture
     ) -> None:
         mocker.patch.object(service._repo, "get_all", return_value=[])
 

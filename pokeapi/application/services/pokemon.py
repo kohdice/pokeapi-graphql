@@ -40,11 +40,11 @@ class PokemonService(PokemonServiceABC):
         """
         return self._repo.get_by_id(id_)
 
-    def get_all(self) -> list | list[BaseEntity]:
+    def get_all(self) -> list[BaseEntity]:
         """Retrieve all Pokémon from the repository.
 
         Returns:
-            list | list[BaseEntity]: A list of all Pokémon in the repository.
+            list[BaseEntity]: A list of all Pokémon in the repository.
 
         """
         return self._repo.get_all()

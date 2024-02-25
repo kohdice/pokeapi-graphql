@@ -4,10 +4,10 @@ from pokeapi.domain.entities.base import BaseEntity
 from pokeapi.infrastructure.database.models.base import BaseModel
 
 
-class PokemonRepositoryABC(ABC):
+class AbilityRepositoryABC(ABC):
     """Abstract base class for sample repositories.
 
-    This class defines the interface for pokemon repositories. Concrete implementations
+    This class defines the interface for ability repositories. Concrete implementations
     should inherit from this class and provide implementations for the abstract methods.
 
     """
