@@ -23,9 +23,7 @@ class TestPokemonService:
         assert isinstance(actual, BaseEntity)
 
     def test_get_by_id_not_found(self, service: PokemonService) -> None:
-        actual = service.get_by_id(0)
-
-        assert actual is None
+        assert service.get_by_id(0) is None
 
     def test_get_all(self, service: PokemonService) -> None:
         actual = service.get_all()
@@ -39,6 +37,4 @@ class TestPokemonService:
     ) -> None:
         mocker.patch.object(service._repo, "get_all", return_value=[])
 
-        actual = service.get_all()
-
-        assert actual == []
+        assert service.get_all() == []

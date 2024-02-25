@@ -42,11 +42,11 @@ class PokemonRepositoryABC(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_all(self) -> list | list[BaseEntity]:
+    def get_all(self) -> list[BaseEntity]:
         """Retrieve all entities from the repository.
 
         Returns:
-            list | list[BaseEntity]: A list of all entities in the repository.
+            list[BaseEntity]: A list of all entities in the repository.
 
         """
         pass  # pragma: no cover

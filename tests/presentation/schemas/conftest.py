@@ -90,7 +90,7 @@ class MockPokemonService(PokemonServiceABC):
 
         return create_entity(id_)
 
-    def get_all(self) -> list | list[MockEntity]:
+    def get_all(self) -> list[MockEntity]:  # type: ignore[override]
         return [
             create_entity(1),
             create_entity(2),

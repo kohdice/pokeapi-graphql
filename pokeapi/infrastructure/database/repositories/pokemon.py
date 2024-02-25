@@ -19,8 +19,8 @@ class PokemonRepository(PokemonRepositoryABC):
     This class extends the abstract base class PokemonRepositoryABC and implements
     methods to interact with the database.
 
-    Args:
-        db (Session): The database session to be used by the repository.
+    Attributes:
+        _db (Session): The database session to be used by the repository.
 
     """
 
@@ -98,7 +98,6 @@ class PokemonRepository(PokemonRepositoryABC):
         statement = select(PokemonModel).where(
             and_(PokemonModel.id_ == id_, PokemonModel.deleted_at.is_(None))
         )
-
         result = self._db.execute(statement).scalar()
 
         if result is None:
@@ -106,18 +105,14 @@ class PokemonRepository(PokemonRepositoryABC):
 
         return self._convert_to_entity(result)
 
-    def get_all(self) -> list | list[PokemonEntity]:
+    def get_all(self) -> list[PokemonEntity]:  # type: ignore[override]
         """Retrieve all Pokémon.
 
         Returns:
-            list | list[PokemonEntity]: A list of all Pokémon.
+            list[PokemonEntity]: A list of all Pokémon.
 
         """
         statement = select(PokemonModel).where(PokemonModel.deleted_at.is_(None))
-
         result = self._db.execute(statement).scalars().all()
-
-        if not result:
-            return []
 
         return [self._convert_to_entity(pokemon) for pokemon in result]

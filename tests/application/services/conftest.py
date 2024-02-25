@@ -21,7 +21,7 @@ class MockPokemonRepository(PokemonRepositoryABC):
 
         return MockPokemonEntity(id_=id_, name="mock")
 
-    def get_all(self) -> list | list[MockPokemonEntity]:
+    def get_all(self) -> list[MockPokemonEntity]:  # type: ignore[override]
         return [
             MockPokemonEntity(id_=1, name="mock_1"),
             MockPokemonEntity(id_=2, name="mock_2"),
