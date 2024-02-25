@@ -27,9 +27,6 @@ jobs:
           docker-compose up -d --build
       - name: Wait for pokeapi to start
         run: sleep 10s
-      - name: Migration by alembic
-        run: |
-          docker-compose exec -T app poetry run alembic upgrade head
       - name: Run pytest
         run: |
           docker-compose exec -T app poetry run pytest --cov=. --cov-branch --cov-report=xml
