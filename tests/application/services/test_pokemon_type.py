@@ -14,7 +14,7 @@ def service(dependency_container: Injector) -> TypeService:
     return TypeService(repo)
 
 
-class TestPokemonService:
+class TestTypeService:
     @pytest.mark.parametrize("id_", [1, 2])
     def test_get_by_id(self, service: TypeService, id_: int) -> None:
         actual = service.get_by_id(id_)
