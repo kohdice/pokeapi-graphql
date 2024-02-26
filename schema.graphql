@@ -1,13 +1,19 @@
+"""ID used to represent a globally unique identifier."""
+scalar GlobalID
+
 type query {
   """Returns a Pokémon resource by ID."""
-  Pokemon(id: ID!): Pokemon
+  Pokemon(id: ID!): Pokemon!
 
   """List of Pokémon."""
   pokemos(before: String, after: String, first: Int, last: Int): PokemonConnection!
-}
 
-"""ID used to represent a globally unique identifier."""
-scalar GlobalID
+  """Returns a Pokémon type by ID."""
+  pokemonType(id: ID!): PokemonType!
+
+  """Returns a Pokémon ability by ID."""
+  pokemonAbility(id: ID!): PokemonAbility!
+}
 
 """Interface for objects with an ID."""
 interface Node {
@@ -63,10 +69,10 @@ type Pokemon implements Node {
   baseTotal: Int!
 
   """Type of this Pokémon."""
-  PokemonsType(before: String, after: String, first: Int, last: Int): PokemonTypeConnection!
+  Types: [PokemonsType!]!
 
   """Ability of this Pokémon."""
-  PokemonsAbility(before: String, after: String, first: Int, last: Int): PokemonAbilityConnection!
+  Abilities: [PokemonsAbility!]!
 }
 
 """An edge in a connection."""
@@ -87,35 +93,22 @@ type PokemonConnection {
   edges: [PokemonEdge]!
 }
 
-
 """Pokémon Type"""
 type PokemonType implements Node {
   """The ID of an object."""
   id: GlobalID!
 
-  """Name of this Pokémon type."""
+  """Name of this Type."""
   typeName: String!
+}
 
-  """Slot of this Pokémon type"""
+"""Pokémon's Type"""
+type PokemonsType {
+  """Type of this Pokémon's Type."""
+  pokemonType: PokemonType!
+
+  """Slot of this Pokémon's type"""
   slot: Int!
-}
-
-"""An edge in a connection."""
-type PokemonTypeEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-
-  """The item at the end of the edge"""
-  node: PokemonType!
-}
-
-"""A connection to a list of items."""
-type PokemonTypeConnection {
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """A list of edges."""
-  edges: [PokemonTypesEdge!]!
 }
 
 """Pokémon Ability"""
@@ -123,30 +116,18 @@ type PokemonAbility implements Node {
   """The ID of an object."""
   id: GlobalID!
 
-  """Name of this Pokémon Anility."""
+  """Name of this Anility."""
   abilityName: String!
+}
 
-  """Slot of this Pokémon Ability"""
+"""Pokémon's Ability"""
+type PokemonsAbility {
+  """Ability of this Pokémon's Ability."""
+  pokemonAbility: PokemonAbility!
+
+  """Slot of this Pokémon's Ability"""
   slot: Int!
 
-  """Whether this Pokémon ability is a hidden ability"""
+  """Whether this Pokémon's ability is a hidden ability"""
   isHidden: Boolean!
-}
-
-"""An edge in a connection."""
-type PokemonAbilityEdge {
-  """A cursor for use in pagination"""
-  cursor: String!
-
-  """The item at the end of the edge"""
-  node: PokemonAbility!
-}
-
-"""A connection to a list of items."""
-type PokemonAbilityConnection {
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """A list of edges."""
-  edges: [PokemonAbilitiesEdge!]!
 }

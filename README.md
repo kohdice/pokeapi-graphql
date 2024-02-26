@@ -13,8 +13,14 @@ GraphQL API of Pokédex
   - [a. Install Docker](#a-install-docker)
   - [b. Clone Repository](#b-clone-repository)
   - [c. Run servers](#c-run-servers)
-  - [d. Database Migration](#d-database-migration)
-  - [e. Health Check](#e-health-check)
+  - [d. Health Check](#d-health-check)
+  - [e. Access GraphQL Playground](#e-access-graphql-playground)
+
+- [4. Scripts](#4-scripts)
+- [5. Architecture](#5-architecture)
+- [6. Directory Structure](#6-directory-structure)
+- [7. Demo](#7-demo)
+  - [Get Pokémons](#get-pokémons)
 
 ## 2. About This Repository
 
@@ -40,16 +46,7 @@ Execute the following command.
 docker compose up --build
 ```
 
-### d. Database Migration
-
-Execute the following command within the `app` container.
-
-```bash
-docker compose exec app bash
-task migrate
-```
-
-### e. Health Check
+### d. Health Check
 
 Execute the following command.
 
@@ -59,7 +56,11 @@ curl -X GET http://localhost:8000/health
 
 If `{"status": "OK"}` is returned, server setup is successful.
 
-## Scripts
+### e. Access GraphQL Playground
+
+- [http://localhost:8000/graphql](http://localhost:8000/graphql)
+
+## 4. Scripts
 
 Run the following commands in the Docker container.
 
@@ -79,4 +80,150 @@ task fmt
 
 ```bash
 task lint
+```
+
+## 5. Architecture
+
+```mermaid
+flowchart LR
+    subgraph "Client"
+        A("Browser")
+    end
+    subgraph "docker-compose"
+        subgraph "app"
+            B(FastAPI)
+            B --> C(Strawberry)
+            C --> D(SQLAlchemy)
+        end
+        subgraph "db"
+            E(MySQL)
+        end
+    end
+
+    A --GraphQL---> B
+    D --> E
+```
+
+## 6. Directory Structure
+
+```bash
+pokeapi-graphql/
+├── pokeapi/
+│   ├── application/            # Application Layer
+│   │   ├── services/           # Application Services
+│   │   │   └── ...
+│   │   └── ...
+│   ├── dependencies/           # Dependency Injection
+│   │   ├── di/                 # DI-related
+│   │   │   └── ...
+│   │   ├── settings/           # Settings
+│   │   │   └── ...
+│   │   └── ...
+│   ├── domain/                 # Domain Layer
+│   │   ├── entities/           # Entity Classes
+│   │   │   └── ...
+│   │   ├── repositories/       # Repository Interfaces
+│   │   │   └── ...
+│   │   ├── services/           # Domain Services
+│   │   │   └── ...
+│   │   └── ...
+│   ├── exceptions/             # Custom Exceptions
+│   │   └── ...
+│   ├── infrastructure/         # Infrastructure Layer
+│   │   ├── database/           # Database Connections, etc.
+│   │   │   ├── models/         # Database Models
+│   │   │   │   └── ...
+│   │   │   ├── repositories/   # Implementation of Database Repositories
+│   │   │   │   └── ...
+│   │   │   └── ...
+│   │   └── ...
+│   ├── presentation/           # Presentation Layer
+│   │   ├── resolvers/          # Resolvers
+│   │   │   └── ...
+│   │   ├── schemas/            # Schema Classes
+│   │   │   └── ...
+│   │   └── ...
+│   ├── main.py                 # Application Entry Point
+│   └── ...
+├── tests/                      # Test Code
+│   └── ...
+└── ...
+```
+
+## 7. Demo
+
+### Get Pokémons
+
+- GraphQL
+
+```graphql
+query {
+  pokemons(first:3) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        nationalPokedexNumber
+        name
+      }
+    }
+  }
+}
+```
+
+- curl
+
+```bash
+curl -Ss -X POST http://localhost:8000/graphql \
+-H "Content-Type: application/json" \
+-d '{"query": "query { pokemons(first:3) { pageInfo { hasNextPage hasPreviousPage startCursor endCursor } edges { cursor node { id nationalPokedexNumber name } } } }"}' | jq .
+```
+
+- Response
+
+```bash
+{
+  "data": {
+    "pokemons": {
+      "pageInfo": {
+        "hasNextPage": true,
+        "hasPreviousPage": false,
+        "startCursor": "YXJyYXljb25uZWN0aW9uOjA=",
+        "endCursor": "YXJyYXljb25uZWN0aW9uOjI="
+      },
+      "edges": [
+        {
+          "cursor": "YXJyYXljb25uZWN0aW9uOjA=",
+          "node": {
+            "id": "UG9rZW1vbjox",
+            "nationalPokedexNumber": 1,
+            "name": "フシギダネ"
+          }
+        },
+        {
+          "cursor": "YXJyYXljb25uZWN0aW9uOjE=",
+          "node": {
+            "id": "UG9rZW1vbjoy",
+            "nationalPokedexNumber": 2,
+            "name": "フシギソウ"
+          }
+        },
+        {
+          "cursor": "YXJyYXljb25uZWN0aW9uOjI=",
+          "node": {
+            "id": "UG9rZW1vbjoz",
+            "nationalPokedexNumber": 3,
+            "name": "フシギバナ"
+          }
+        }
+      ]
+    }
+  }
+}
 ```
