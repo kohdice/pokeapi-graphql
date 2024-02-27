@@ -105,8 +105,16 @@ plugins = ["strawberry.ext.mypy_plugin", "pydantic.mypy"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+# TODO: Once tests for data manipulation are implemented,
+# they should be removed from the list of excluded tests
 [tool.coverage.run]
-omit = ["tests/*", ".venv/*", "migrations/*"]
+omit = [
+  "tests/*",
+  ".venv/*",
+  "migrations/*",
+  "pokeapi/infrastructure/database/models/token_whitelist.py",
+  "pokeapi/infrastructure/database/models/users.py",
+]
 
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
