@@ -15,6 +15,7 @@ pymysql = "^1.1.0"
 python-jose = { extras = ["cryptography"], version = "^3.3.0" }
 httpx = "^0.26.0"
 injector = "^0.21.0"
+passlib = { extras = ["argon2"], version = "^1.7.4" }
 
 
 [tool.poetry.group.dev.dependencies]
@@ -112,6 +113,8 @@ omit = [
   "tests/*",
   ".venv/*",
   "migrations/*",
+  "pokeapi/domain/entities/token_whitelist.py",
+  "pokeapi/domain/entities/user.py",
   "pokeapi/infrastructure/database/models/token_whitelist.py",
   "pokeapi/infrastructure/database/models/users.py",
 ]
