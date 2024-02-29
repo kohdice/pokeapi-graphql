@@ -10,6 +10,8 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
+from migrations.seeds.users import users_seed
+
 
 # revision identifiers, used by Alembic.
 revision: str = "ae489317139c"
@@ -19,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.create_table("users",
+    users = op.create_table("users",
     sa.Column("id", sa.Integer(), autoincrement=True, nullable=False, comment="ID"),
     sa.Column("username", sa.String(length=30), nullable=False, unique=True, comment="Username"),
     sa.Column("password", sa.String(length=255), nullable=False, comment="Password"),
@@ -29,7 +31,9 @@ def upgrade() -> None:
     sa.Column("updated_at", sa.DateTime(), nullable=False, comment="Update DateTime"),
     sa.Column("deleted_at", sa.DateTime(), nullable=True, comment="Deletion DateTime"),
     sa.PrimaryKeyConstraint("id"),
-    ),
+    )
+    # Seed data insertion
+    op.bulk_insert(users, users_seed)
 
 
 def downgrade() -> None:
