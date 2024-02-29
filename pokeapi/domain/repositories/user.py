@@ -44,14 +44,14 @@ class UserRepositoryABC(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_by_nickname(self, nickname: str) -> BaseEntity | None:
-        """Retrieve an entity by its nickname.
+    def get_by_username(self, username: str) -> BaseEntity | None:
+        """Retrieve an entity by its username.
 
         Args:
-            nickname (str): The nickname of the entity to retrieve.
+            username (str): The username of the entity to retrieve.
 
         Returns:
-            BaseEntity | None: The entity with the specified nickname, or None if not found.
+            BaseEntity | None: The entity with the specified username, or None if not found.
 
         """
         pass  # pragma: no cover
