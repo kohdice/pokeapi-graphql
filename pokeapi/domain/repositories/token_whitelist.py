@@ -32,7 +32,7 @@ class TokenWhitelistRepositoryABC(ABC):
 
     @abstractmethod
     def get_by_access_token(
-        self, access_token: str, expiration: datetime.datetime
+        self, entity: BaseEntity, expiration: datetime.datetime
     ) -> BaseEntity | None:
         """Retrieve an entity by its access token.
 
@@ -40,7 +40,7 @@ class TokenWhitelistRepositoryABC(ABC):
             access_token (str): The access token of the entity to retrieve.
 
         Returns:
-            BaseEntity | None: The entity with the specified access token, or None if not found.
+            entity (BaseEntity): The entity with the specified access token.
             expiration (datetime.datetime): The expiration date of the access token.
 
         """
@@ -48,7 +48,7 @@ class TokenWhitelistRepositoryABC(ABC):
 
     @abstractmethod
     def get_by_refresh_token(
-        self, refresh_token: str, expiration: datetime.datetime
+        self, entity: BaseEntity, expiration: datetime.datetime
     ) -> BaseEntity | None:
         """Retrieve an entity by its refresh token.
 
@@ -56,7 +56,7 @@ class TokenWhitelistRepositoryABC(ABC):
             refresh_token (str): The refresh token of the entity to retrieve.
 
         Returns:
-            BaseEntity | None: The entity with the specified refresh token, or None if not found.
+            entity (BaseEntity): The entity with the specified refresh token.
             expiration (datetime.datetime): The expiration date of the refresh token.
 
         """
