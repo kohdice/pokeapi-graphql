@@ -1,3 +1,4 @@
+import datetime
 from abc import ABC, abstractmethod
 
 from pokeapi.domain.entities.base import BaseEntity
@@ -30,7 +31,9 @@ class TokenWhitelistRepositoryABC(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_by_access_token(self, access_token: str) -> BaseEntity | None:
+    def get_by_access_token(
+        self, access_token: str, expiration: datetime.datetime
+    ) -> BaseEntity | None:
         """Retrieve an entity by its access token.
 
         Args:
@@ -38,12 +41,15 @@ class TokenWhitelistRepositoryABC(ABC):
 
         Returns:
             BaseEntity | None: The entity with the specified access token, or None if not found.
+            expiration (datetime.datetime): The expiration date of the access token.
 
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_by_refresh_token(self, refresh_token: str) -> BaseEntity | None:
+    def get_by_refresh_token(
+        self, refresh_token: str, expiration: datetime.datetime
+    ) -> BaseEntity | None:
         """Retrieve an entity by its refresh token.
 
         Args:
@@ -51,6 +57,7 @@ class TokenWhitelistRepositoryABC(ABC):
 
         Returns:
             BaseEntity | None: The entity with the specified refresh token, or None if not found.
+            expiration (datetime.datetime): The expiration date of the refresh token.
 
         """
         pass  # pragma: no cover
@@ -82,11 +89,12 @@ class TokenWhitelistRepositoryABC(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def delete(self, user_id: int) -> None:
+    def delete(self, user_id: int, expiration: datetime.datetime) -> None:
         """Delete expired entities.
 
         Args:
             user_id (int): The identifier of the entity to be deleted.
+            expiration (datetime.datetime): The expiration date of the entity.
 
         """
         pass  # pragma: no cover
