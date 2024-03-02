@@ -56,7 +56,7 @@ class TokenWhitelistRepositoryABC(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def create(self, entity: BaseEntity) -> BaseEntity:
+    def create(self, entity: BaseEntity) -> None:
         """Create a new entity.
 
         Args:
@@ -69,7 +69,7 @@ class TokenWhitelistRepositoryABC(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def update(self, entity: BaseEntity) -> BaseEntity:
+    def update(self, entity: BaseEntity) -> None:
         """Update an entity.
 
         Args:
