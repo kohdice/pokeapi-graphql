@@ -1,5 +1,4 @@
 import os
-from unittest.mock import mock_open
 
 import pytest
 from pytest_mock import MockerFixture
@@ -85,19 +84,15 @@ class TestAppConfig:
             config._load_private_key()
 
     def test_load_private_key(self, config: AppConfig, mocker: MockerFixture) -> None:
-        mocker.patch("builtins.open", mock_open(read_data=b"private_key"))
-
         actual_1 = config._load_private_key()
         actual_2 = config._load_private_key()
 
-        assert isinstance(actual_1, bytes)
-        assert isinstance(actual_2, bytes)
+        assert isinstance(actual_1, str)
+        assert isinstance(actual_2, str)
         assert actual_1 == actual_2
 
     def test_private_key(self, config: AppConfig, mocker: MockerFixture) -> None:
-        mocker.patch("builtins.open", mock_open(read_data=b"private_key"))
-
-        assert isinstance(config.private_key, bytes)
+        assert isinstance(config.private_key, str)
 
     def test_load_public_key_with_error(
         self, config: AppConfig, mocker: MockerFixture
@@ -108,19 +103,15 @@ class TestAppConfig:
             config._load_public_key()
 
     def test_load_public_key(self, config: AppConfig, mocker: MockerFixture) -> None:
-        mocker.patch("builtins.open", mock_open(read_data=b"public_key"))
-
         actual_1 = config._load_public_key()
         actual_2 = config._load_public_key()
 
-        assert isinstance(actual_1, bytes)
-        assert isinstance(actual_2, bytes)
+        assert isinstance(actual_1, str)
+        assert isinstance(actual_2, str)
         assert actual_1 == actual_2
 
     def test_public_key(self, config: AppConfig, mocker: MockerFixture) -> None:
-        mocker.patch("builtins.open", mock_open(read_data=b"private_key"))
-
-        assert isinstance(config.public_key, bytes)
+        assert isinstance(config.public_key, str)
 
     def test_jwt_algorithm(self, config: AppConfig, mocker: MockerFixture) -> None:
         mocker.patch("os.getenv", return_value="test_algorithm")

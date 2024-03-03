@@ -23,11 +23,11 @@ class AppConfigABC(ABC):
     @staticmethod
     @cache
     @abstractmethod
-    def _load_private_key() -> bytes:
+    def _load_private_key() -> str:
         """Load the private key for the application.
 
         Returns:
-            bytes: The private key for the application.
+            str: The private key for the application.
 
         """
         pass  # pragma: no cover
@@ -35,11 +35,11 @@ class AppConfigABC(ABC):
     @staticmethod
     @cache
     @abstractmethod
-    def _load_public_key() -> bytes:
+    def _load_public_key() -> str:
         """Load the public key for the application.
 
         Returns:
-            bytes: The public key for the application.
+            str: The public key for the application.
 
         """
         pass  # pragma: no cover
@@ -79,22 +79,22 @@ class AppConfigABC(ABC):
 
     @property
     @abstractmethod
-    def private_key(self) -> bytes:
+    def private_key(self) -> str:
         """The private key for the application.
 
         Returns:
-            bytes: The private key for the application.
+            str: The private key for the application.
 
         """
         pass  # pragma: no cover
 
     @property
     @abstractmethod
-    def public_key(self) -> bytes:
+    def public_key(self) -> str:
         """The public key for the application.
 
         Returns:
-            bytes: The public key for the application.
+            str: The public key for the application.
 
         """
         pass  # pragma: no cover

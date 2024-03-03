@@ -1,6 +1,8 @@
 import os
 from functools import cache
 
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from injector import singleton
 
 from pokeapi.exceptions.config import (
@@ -21,7 +23,7 @@ class AppConfig(AppConfigABC):
 
     @staticmethod
     @cache
-    def _load_private_key() -> bytes:
+    def _load_private_key() -> str:
         """Load the private key from the environment.
 
         Returns:
@@ -37,12 +39,19 @@ class AppConfig(AppConfigABC):
             raise UnsetEnvironmentVariableError(
                 "PRIVATE_KEY environment variable is not set"
             )
+
         with open(private_key_path, "rb") as f:
-            return f.read()
+            key = serialization.load_pem_private_key(f.read(), password=None)
+
+            return key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption(),
+            ).decode("utf-8")
 
     @staticmethod
     @cache
-    def _load_public_key() -> bytes:
+    def _load_public_key() -> str:
         """Load the public key from the environment.
 
         Returns:
@@ -60,7 +69,12 @@ class AppConfig(AppConfigABC):
             )
 
         with open(public_key_path, "rb") as f:
-            return f.read()
+            key = serialization.load_pem_public_key(f.read(), backend=default_backend())
+
+            return key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo,
+            ).decode("utf-8")
 
     @property
     def stage(self) -> str:
@@ -122,21 +136,21 @@ class AppConfig(AppConfigABC):
         return url
 
     @property
-    def private_key(self) -> bytes:
+    def private_key(self) -> str:
         """The private key for the application.
 
         Returns:
-            bytes: The private key for the application.
+            str: The private key for the application.
 
         """
         return self._load_private_key()
 
     @property
-    def public_key(self) -> bytes:
+    def public_key(self) -> str:
         """The public key for the application.
 
         Returns:
-            bytes: The public key for the application.
+            str: The public key for the application.
 
         """
         return self._load_public_key()
