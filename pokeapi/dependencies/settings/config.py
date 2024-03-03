@@ -200,3 +200,23 @@ class AppConfig(AppConfigABC):
             )
 
         return int(lifetime)
+
+    @property
+    def app_domain(self) -> str:
+        """The domain of the application.
+
+        Returns:
+            str: The domain of the application.
+
+        Raises:
+            UnsetEnvironmentVariableError: If the environment variable is not set.
+
+        """
+        domain = os.getenv("APP_DOMAIN")
+
+        if domain is None:
+            raise UnsetEnvironmentVariableError(
+                "APP_DOMAIN environment variable is not set"
+            )
+
+        return domain

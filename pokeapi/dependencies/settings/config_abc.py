@@ -131,3 +131,14 @@ class AppConfigABC(ABC):
 
         """
         pass  # pragma: no cover
+
+    @property
+    @abstractmethod
+    def app_domain(self) -> str:
+        """The domain of the application.
+
+        Returns:
+            str: The domain of the application.
+
+        """
+        pass  # pragma: no cover

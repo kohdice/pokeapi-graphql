@@ -164,3 +164,16 @@ class TestAppConfig:
 
         with pytest.raises(UnsetEnvironmentVariableError):
             _ = config.refresh_token_lifetime
+
+    def test_app_domain(self, config: AppConfig, mocker: MockerFixture) -> None:
+        mocker.patch("os.getenv", return_value="test_domain")
+
+        assert config.app_domain == "test_domain"
+
+    def test_app_domain_with_error(
+        self, config: AppConfig, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("os.getenv", return_value=None)
+
+        with pytest.raises(UnsetEnvironmentVariableError):
+            _ = config.app_domain
