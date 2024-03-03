@@ -152,6 +152,15 @@ pokeapi-graphql/
 
 ## 7. Demo
 
+### Sample User
+
+```bash
+{
+  "username": "Red",
+  "password": "password"
+}
+```
+
 ### Get Pokémons
 
 - GraphQL
