@@ -24,7 +24,7 @@ class TokenServiceABC(ABC):
             str: The JWT token.
 
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def decode_token(self, token: str) -> dict:
@@ -37,4 +37,4 @@ class TokenServiceABC(ABC):
             dict: The decoded payload.
 
         """
-        pass
+        pass  # pragma: no cover
