@@ -1,5 +1,8 @@
 import os
+from functools import cache
 
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from injector import singleton
 
 from pokeapi.exceptions.config import (
@@ -18,12 +21,71 @@ class AppConfig(AppConfigABC):
 
     """
 
+    @staticmethod
+    @cache
+    def _load_private_key() -> str:
+        """Load the private key from the environment.
+
+        Returns:
+            bytes: The private key for the application.
+
+        Raises:
+            UnsetEnvironmentVariableError: If the environment variable is not set.
+
+        """
+        private_key_path = os.getenv("PRIVATE_KEY")
+
+        if private_key_path is None:
+            raise UnsetEnvironmentVariableError(
+                "PRIVATE_KEY environment variable is not set"
+            )
+
+        with open(private_key_path, "rb") as f:
+            key = serialization.load_pem_private_key(f.read(), password=None)
+
+            return key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption(),
+            ).decode("utf-8")
+
+    @staticmethod
+    @cache
+    def _load_public_key() -> str:
+        """Load the public key from the environment.
+
+        Returns:
+            bytes: The public key for the application.
+
+        Raises:
+            UnsetEnvironmentVariableError: If the environment variable is not set.
+
+        """
+        public_key_path = os.getenv("PUBLIC_KEY")
+
+        if public_key_path is None:
+            raise UnsetEnvironmentVariableError(
+                "PUBLIC_KEY environment variable is not set"
+            )
+
+        with open(public_key_path, "rb") as f:
+            key = serialization.load_pem_public_key(f.read(), backend=default_backend())
+
+            return key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo,
+            ).decode("utf-8")
+
     @property
     def stage(self) -> str:
         """The stage of the application (e.g. 'development', 'staging', 'production').
 
         Returns:
             str: The stage of the application.
+
+        Raises:
+            UnsetEnvironmentVariableError: If the environment variable is not set.
+            InvalidEnvironmentValueError: If the environment variable has an invalid value.
 
         """
         stage = os.getenv("STAGE")
@@ -60,6 +122,9 @@ class AppConfig(AppConfigABC):
         Returns:
             str: The URL for the database connection.
 
+        Raises:
+            UnsetEnvironmentVariableError: If the environment variable is not set.
+
         """
         url = os.getenv("DATABASE_URL")
 
@@ -69,3 +134,103 @@ class AppConfig(AppConfigABC):
             )
 
         return url
+
+    @property
+    def private_key(self) -> str:
+        """The private key for the application.
+
+        Returns:
+            str: The private key for the application.
+
+        """
+        return self._load_private_key()
+
+    @property
+    def public_key(self) -> str:
+        """The public key for the application.
+
+        Returns:
+            str: The public key for the application.
+
+        """
+        return self._load_public_key()
+
+    @property
+    def jwt_algorithm(self) -> str:
+        """The algorithm to use for JWT signing.
+
+        Returns:
+            str: The algorithm to use for JWT signing.
+
+        Raises:
+            UnsetEnvironmentVariableError: If the environment variable is not set.
+
+        """
+        algorithm = os.getenv("JWT_ALGORITHM")
+
+        if algorithm is None:
+            raise UnsetEnvironmentVariableError(
+                "JWT_ALGORITHM environment variable is not set"
+            )
+
+        return algorithm
+
+    @property
+    def access_token_lifetime(self) -> int:
+        """The lifetime of access tokens in hours.
+
+        Returns:
+            int: The lifetime of access tokens in hours.
+
+        Raises:
+            UnsetEnvironmentVariableError: If the environment variable is not set.
+
+        """
+        lifetime = os.getenv("ACCESS_TOKEN_LIFETIME")
+
+        if lifetime is None:
+            raise UnsetEnvironmentVariableError(
+                "ACCESS_TOKEN_LIFETIME environment variable is not set"
+            )
+
+        return int(lifetime)
+
+    @property
+    def refresh_token_lifetime(self) -> int:
+        """The lifetime of refresh tokens in hours.
+
+        Returns:
+            int: The lifetime of refresh tokens in hours.
+
+        Reises:
+            UnsetEnvironmentVariableError: If the environment variable is not set.
+
+        """
+        lifetime = os.getenv("REFRESH_TOKEN_LIFETIME")
+
+        if lifetime is None:
+            raise UnsetEnvironmentVariableError(
+                "REFRESH_TOKEN_LIFETIME environment variable is not set"
+            )
+
+        return int(lifetime)
+
+    @property
+    def app_domain(self) -> str:
+        """The domain of the application.
+
+        Returns:
+            str: The domain of the application.
+
+        Raises:
+            UnsetEnvironmentVariableError: If the environment variable is not set.
+
+        """
+        domain = os.getenv("APP_DOMAIN")
+
+        if domain is None:
+            raise UnsetEnvironmentVariableError(
+                "APP_DOMAIN environment variable is not set"
+            )
+
+        return domain

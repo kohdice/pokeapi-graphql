@@ -9,8 +9,6 @@ from pokeapi.exceptions.config import (
     UnsetEnvironmentVariableError,
 )
 
-TEST_DATABASE_URL = "mysql://root:root@db:3306/main_db?charset=utf8"
-
 
 class TestAppConfig:
     @pytest.fixture()
@@ -65,9 +63,9 @@ class TestAppConfig:
         assert config.debug is expected
 
     def test_database_url(self, config: AppConfig, mocker: MockerFixture) -> None:
-        mocker.patch("os.getenv", return_value=TEST_DATABASE_URL)
+        mocker.patch("os.getenv", return_value="test_database_url")
 
-        assert config.database_url == TEST_DATABASE_URL
+        assert config.database_url == "test_database_url"
 
     def test_database_url_with_error(
         self, config: AppConfig, mocker: MockerFixture
@@ -76,3 +74,97 @@ class TestAppConfig:
 
         with pytest.raises(UnsetEnvironmentVariableError):
             _ = config.database_url
+
+    def test_load_private_key_with_error(
+        self, config: AppConfig, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("os.getenv", return_value=None)
+
+        with pytest.raises(UnsetEnvironmentVariableError):
+            config._load_private_key()
+
+    def test_load_private_key(self, config: AppConfig, mocker: MockerFixture) -> None:
+        actual_1 = config._load_private_key()
+        actual_2 = config._load_private_key()
+
+        assert isinstance(actual_1, str)
+        assert isinstance(actual_2, str)
+        assert actual_1 == actual_2
+
+    def test_private_key(self, config: AppConfig, mocker: MockerFixture) -> None:
+        assert isinstance(config.private_key, str)
+
+    def test_load_public_key_with_error(
+        self, config: AppConfig, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("os.getenv", return_value=None)
+
+        with pytest.raises(UnsetEnvironmentVariableError):
+            config._load_public_key()
+
+    def test_load_public_key(self, config: AppConfig, mocker: MockerFixture) -> None:
+        actual_1 = config._load_public_key()
+        actual_2 = config._load_public_key()
+
+        assert isinstance(actual_1, str)
+        assert isinstance(actual_2, str)
+        assert actual_1 == actual_2
+
+    def test_public_key(self, config: AppConfig, mocker: MockerFixture) -> None:
+        assert isinstance(config.public_key, str)
+
+    def test_jwt_algorithm(self, config: AppConfig, mocker: MockerFixture) -> None:
+        mocker.patch("os.getenv", return_value="test_algorithm")
+
+        assert config.jwt_algorithm == "test_algorithm"
+
+    def test_jwt_algorithm_with_error(
+        self, config: AppConfig, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("os.getenv", return_value=None)
+
+        with pytest.raises(UnsetEnvironmentVariableError):
+            _ = config.jwt_algorithm
+
+    def test_access_token_lifetime(
+        self, config: AppConfig, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("os.getenv", return_value="1")
+
+        assert config.access_token_lifetime == 1
+
+    def test_access_token_lifetime_with_error(
+        self, config: AppConfig, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("os.getenv", return_value=None)
+
+        with pytest.raises(UnsetEnvironmentVariableError):
+            _ = config.access_token_lifetime
+
+    def test_refresh_token_lifetime(
+        self, config: AppConfig, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("os.getenv", return_value="1000")
+
+        assert config.refresh_token_lifetime == 1000
+
+    def test_refresh_token_lifetime_with_error(
+        self, config: AppConfig, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("os.getenv", return_value=None)
+
+        with pytest.raises(UnsetEnvironmentVariableError):
+            _ = config.refresh_token_lifetime
+
+    def test_app_domain(self, config: AppConfig, mocker: MockerFixture) -> None:
+        mocker.patch("os.getenv", return_value="test_domain")
+
+        assert config.app_domain == "test_domain"
+
+    def test_app_domain_with_error(
+        self, config: AppConfig, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("os.getenv", return_value=None)
+
+        with pytest.raises(UnsetEnvironmentVariableError):
+            _ = config.app_domain
