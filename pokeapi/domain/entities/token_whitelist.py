@@ -1,6 +1,6 @@
 import datetime
 
-from pokeapi.domain.entities.base import BaseEntity
+from .base import BaseEntity
 
 
 class TokenWhitelist(BaseEntity):

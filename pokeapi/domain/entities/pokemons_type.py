@@ -1,5 +1,5 @@
-from pokeapi.domain.entities.base import BaseEntity
-from pokeapi.domain.entities.pokemon_type import PokemonType
+from .base import BaseEntity
+from .pokemon_type import PokemonType
 
 
 class PokemonsType(BaseEntity):

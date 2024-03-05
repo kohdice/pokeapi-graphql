@@ -1,4 +1,4 @@
-from pokeapi.domain.entities.base import BaseEntity
+from .base import BaseEntity
 
 
 class User(BaseEntity):
