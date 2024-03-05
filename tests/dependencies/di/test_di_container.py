@@ -4,10 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from pokeapi.application.services.pokemon import PokemonService
+from pokeapi.dependencies.di.application import ApplicationServiceModule
 from pokeapi.dependencies.di.config import ConfigModule
 from pokeapi.dependencies.di.database import DatabaseModule
 from pokeapi.dependencies.di.repository import RepositoryModule
-from pokeapi.dependencies.di.service import ServiceModule
 from pokeapi.dependencies.settings import AppConfig
 from pokeapi.domain.entities.pokemon import Pokemon as PokemonEntity
 from pokeapi.infrastructure.database.models import Pokemon as PokemonModel
@@ -18,7 +18,12 @@ class TestDIContainer:
     @pytest.fixture(scope="module")
     def dependency_container(self) -> Injector:
         return Injector(
-            [ConfigModule(), DatabaseModule(), RepositoryModule(), ServiceModule()]
+            [
+                ConfigModule(),
+                DatabaseModule(),
+                RepositoryModule(),
+                ApplicationServiceModule(),
+            ]
         )
 
     def test_singleton(self, dependency_container: Injector) -> None:
