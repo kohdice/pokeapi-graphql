@@ -12,15 +12,15 @@ class AuthenticationServiceABC(ABC):
     """
 
     @abstractmethod
-    def login(self, username: str, password: str) -> BaseEntity:
-        """Log in a user with the given credentials.
+    def auth(self, username: str, password: str) -> BaseEntity:
+        """Authenticate a user with the given credentials.
 
         Args:
-            username (str): The username of the user to log in.
-            password (str): The password of the user to log in.
+            username (str): The username of the user to authenticate.
+            password (str): The password of the user to authenticate.
 
         Returns:
-            BaseEntity: The token issued to the logged-in user.
+            BaseEntity: The token issued to the user.
 
         """
         pass  # pragma: no cover
