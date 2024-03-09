@@ -35,7 +35,7 @@ class UserRepository(UserRepositoryABC):
         """
         self._db = db
 
-    def _convert_to_entity(self, model: UserModel) -> UserEntity:  # type: ignore[override]
+    def _convert_to_entity(self, model: UserModel) -> UserEntity:
         """Converts a SQLAlchemy model to a domain entity.
 
         This method converts a SQLAlchemy model instance to a corresponding domain entity
@@ -94,11 +94,14 @@ class UserRepository(UserRepositoryABC):
 
         return self._convert_to_entity(result)
 
-    def create(self, entity: UserEntity) -> None:  # type: ignore[override]
+    def create(self, entity: UserEntity) -> UserEntity:
         """Create a new entity.
 
         Args:
             entity (BaseEntity): The entity to be created.
+
+        Returns:
+            BaseEntity: The created entity.
 
         Raises:
             UserCreationError: If an error occurs while creating the entity.
@@ -112,14 +115,24 @@ class UserRepository(UserRepositoryABC):
         )
 
         try:
-            self._db.execute(statement)
+            result = self._db.execute(statement)
             self._db.commit()
         except IntegrityError as e:
             self._db.rollback()
             self.LOGGER.error(e)
             raise UserCreationError("Failed to create user") from None
 
-    def update(self, entity: UserEntity) -> None:  # type: ignore[override]
+        if result.inserted_primary_key is None:
+            raise UserCreationError("Failed to create user")
+
+        read_statement = select(UserModel).where(
+            UserModel.id_ == result.inserted_primary_key[0]
+        )
+        created_user = self._db.execute(read_statement).scalar_one()
+
+        return self._convert_to_entity(created_user)
+
+    def update(self, entity: UserEntity) -> UserEntity:
         """Update an entity.
 
         Args:
@@ -138,10 +151,22 @@ class UserRepository(UserRepositoryABC):
                 updated_by=entity.username,
             )
         )
+
         try:
-            self._db.execute(statement)
+            result = self._db.execute(statement)
             self._db.commit()
         except IntegrityError as e:
             self._db.rollback()
             self.LOGGER.error(e)
             raise UserUpdateError("Failed to update user") from None
+
+        if result.rowcount == 0:
+            self.LOGGER.error(
+                UserUpdateError(f"Failed to update user. user_id: {entity.id_}")
+            )
+            raise UserUpdateError("Failed to update user.")
+
+        read_statement = select(UserModel).where(UserModel.id_ == entity.id_)
+        updated_user = self._db.execute(read_statement).scalar_one()
+
+        return self._convert_to_entity(updated_user)
