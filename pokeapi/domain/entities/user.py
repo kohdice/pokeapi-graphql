@@ -11,6 +11,6 @@ class User(BaseEntity):
 
     """
 
-    id_: int | None
+    id_: int = 0
     username: str
     password: str
