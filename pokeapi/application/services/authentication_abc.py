@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from pokeapi.domain.entities.base import BaseEntity
+from pokeapi.domain.entities.token import Token
 
 
 class AuthenticationServiceABC(ABC):
@@ -12,7 +12,7 @@ class AuthenticationServiceABC(ABC):
     """
 
     @abstractmethod
-    def auth(self, username: str, password: str) -> BaseEntity:
+    def auth(self, username: str, password: str) -> Token:
         """Authenticate a user with the given credentials.
 
         Args:
@@ -20,26 +20,26 @@ class AuthenticationServiceABC(ABC):
             password (str): The password of the user to authenticate.
 
         Returns:
-            BaseEntity: The token issued to the user.
+            Token: The token issued to the user.
 
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def refresh(self, token: str) -> BaseEntity:
+    def refresh(self, token: str) -> Token:
         """Refresh a user's token.
 
         Args:
             token (str): The token to refresh.
 
         Returns:
-            BaseEntity: The refreshed token.
+            Token: The refreshed token.
 
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def create_user(self, username: str, password: str) -> BaseEntity:
+    def create_user(self, username: str, password: str) -> Token:
         """Create a new user with the given credentials.
 
         Args:
@@ -47,7 +47,7 @@ class AuthenticationServiceABC(ABC):
             password (str): The password of the new user.
 
         Returns:
-            BaseEntity: The token issued to the new user.
+            Token: The token issued to the new user.
 
         """
         pass  # pragma: no cover
