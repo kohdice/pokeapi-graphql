@@ -8,19 +8,20 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from freezegun import freeze_time
 from injector import Injector
 from jose import jwt
+from pytest_mock import MockerFixture
 
 from pokeapi.dependencies.settings.config import AppConfig
 from pokeapi.domain.entities.user import User
-from pokeapi.domain.services.token import TokenService
+from pokeapi.domain.services.jwt import JWTService
 from pokeapi.exceptions.token import TokenVerificationError
 from tests.conftest import EXECUTION_DATETIME, ISSUE_DATETIME
 
 
 @pytest.fixture(scope="module")
-def service(dependency_container: Injector) -> TokenService:
+def service(dependency_container: Injector) -> JWTService:
     config = dependency_container.get(AppConfig)
 
-    return TokenService(config)
+    return JWTService(config)
 
 
 @pytest.fixture(scope="module")
@@ -157,11 +158,11 @@ def access_token_no_jti(
     return actual
 
 
-class TestTokenServices:
+class TestJWTServices:
     @freeze_time(ISSUE_DATETIME)
     def test_create_token(
         self,
-        service: TokenService,
+        service: JWTService,
         exp: datetime.datetime,
         jti: str,
         access_token: str,
@@ -171,11 +172,24 @@ class TestTokenServices:
 
         assert token == access_token
 
+    @freeze_time(ISSUE_DATETIME)
+    def test_create_token_invalid_type(
+        self,
+        service: JWTService,
+        exp: datetime.datetime,
+        jti: str,
+        mocker: MockerFixture,
+    ) -> None:
+        user = User(id_=1, username="Red", password="password")
+        mocker.patch("jose.jwt.encode", return_value=1)
+        with pytest.raises(TypeError):
+            service.create_token(user, exp, jti)
+
     @freeze_time(EXECUTION_DATETIME)
     def test_decode_token(
         self,
         dependency_container: Injector,
-        service: TokenService,
+        service: JWTService,
         exp: datetime.datetime,
         iat: datetime.datetime,
         jti: str,
@@ -193,27 +207,33 @@ class TestTokenServices:
 
     @freeze_time(EXECUTION_DATETIME)
     def test_decode_invalid_issuer(
-        self, service: TokenService, access_token_invalid_issuer: str
+        self, service: JWTService, access_token_invalid_issuer: str
     ) -> None:
         with pytest.raises(TokenVerificationError):
             service.decode_token(access_token_invalid_issuer)
 
     def test_decode_invalid_expired(
-        self, service: TokenService, access_token: str
+        self, service: JWTService, access_token: str
     ) -> None:
         with pytest.raises(TokenVerificationError):
             service.decode_token(access_token)
 
     @freeze_time(EXECUTION_DATETIME)
     def test_decode_invalid_signature(
-        self, service: TokenService, access_token_invalid_signature: str
+        self, service: JWTService, access_token_invalid_signature: str
     ) -> None:
         with pytest.raises(TokenVerificationError):
             service.decode_token(access_token_invalid_signature)
 
     @freeze_time(EXECUTION_DATETIME)
-    def test_decode_no_jti(
-        self, service: TokenService, access_token_no_jti: str
-    ) -> None:
+    def test_decode_no_jti(self, service: JWTService, access_token_no_jti: str) -> None:
         with pytest.raises(TokenVerificationError):
             service.decode_token(access_token_no_jti)
+
+    @freeze_time(EXECUTION_DATETIME)
+    def test_decode_invalid_type(
+        self, service: JWTService, access_token: str, mocker: MockerFixture
+    ) -> None:
+        mocker.patch("jose.jwt.decode", return_value=1)
+        with pytest.raises(TypeError):
+            service.decode_token(access_token)

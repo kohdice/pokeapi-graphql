@@ -8,14 +8,14 @@ from pokeapi.dependencies.settings.config import AppConfigABC
 from pokeapi.domain.entities.user import User
 from pokeapi.exceptions.token import TokenVerificationError
 
-from .token_abc import TokenServiceABC
+from .jwt_abc import JWTServiceABC
 
 
 @singleton
-class TokenService(TokenServiceABC):
-    """Token services.
+class JWTService(JWTServiceABC):
+    """Service for JWT token creation and decoding.
 
-    token services to create and decode JWT tokens.
+    This class provides the methods for creating and decoding JWT tokens.
 
     Attributes:
         _config (AppConfigABC): The application configuration.
@@ -43,6 +43,9 @@ class TokenService(TokenServiceABC):
         Returns:
             str: The JWT token.
 
+        Raises:
+            TypeError: If the token is not a string.
+
         """
         data = {
             "iss": self._config.app_domain,
@@ -58,7 +61,8 @@ class TokenService(TokenServiceABC):
         )
 
         # NOTE: The token is a string, but the type hint is not recognized.
-        assert isinstance(token, str)
+        if not isinstance(token, str):
+            raise TypeError("The token is not a string.")
 
         return token
 
@@ -73,6 +77,7 @@ class TokenService(TokenServiceABC):
 
         Raises:
             TokenVerificationError: If the token is invalid.
+            TypeError: If the payload is not a dictionary.
 
         """
         try:
@@ -89,7 +94,8 @@ class TokenService(TokenServiceABC):
             raise TokenVerificationError("Token verification failed.") from None
 
         # NOTE: The payload is a dict, but the type hint is not recognized.
-        assert isinstance(payload, dict)
+        if not isinstance(payload, dict):
+            raise TypeError("The payload is not a dictionary.")
 
         if "jti" not in payload:
             self._logger.error(

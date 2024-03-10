@@ -4,10 +4,12 @@ from abc import ABC, abstractmethod
 from pokeapi.domain.entities.user import User
 
 
-class TokenServiceABC(ABC):
-    """Abstract class for Token services.
+class JWTServiceABC(ABC):
+    """Abstract class for JWT token creation and decoding.
 
-    This class is used to define the methods that will be used to create and decode JWT tokens.
+    This class is an abstract class that defines the methods that a JWT token
+    creation and decoding service should implement.
+
 
     """
 
