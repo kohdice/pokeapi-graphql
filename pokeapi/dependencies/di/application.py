@@ -8,10 +8,10 @@ from pokeapi.application.services.pokemon_type import TypeService
 from pokeapi.application.services.pokemon_type_abc import TypeServiceABC
 
 
-class ServiceModule(Module):
-    """A module for providing service-related dependencies.
+class ApplicationServiceModule(Module):
+    """A module for providing application service-related dependencies.
 
-    This module provides the service as a dependency to be used by other classes in the application.
+    This module provides the application service as a dependency to be used by other classes in the application.
 
     """
 

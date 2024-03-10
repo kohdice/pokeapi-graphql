@@ -1,4 +1,4 @@
-from pokeapi.domain.entities.base import BaseEntity
+from .base import BaseEntity
 
 
 class User(BaseEntity):
@@ -11,6 +11,6 @@ class User(BaseEntity):
 
     """
 
-    id_: int | None
+    id_: int = 0
     username: str
     password: str

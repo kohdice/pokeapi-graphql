@@ -1,8 +1,10 @@
+from injector import singleton
 from passlib.hash import argon2
 
 from .password_abc import PasswordServiceABC
 
 
+@singleton
 class PasswordService(PasswordServiceABC):
     """Service to hash and verify passwords.
 

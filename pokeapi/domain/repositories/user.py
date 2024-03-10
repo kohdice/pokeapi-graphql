@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from pokeapi.domain.entities.base import BaseEntity
-from pokeapi.infrastructure.database.models.base import BaseModel
+from pokeapi.domain.entities.user import User as UserEntity
+from pokeapi.infrastructure.database.models.users import User as UserModel
 
 
 class UserRepositoryABC(ABC):
@@ -14,64 +14,64 @@ class UserRepositoryABC(ABC):
     """
 
     @abstractmethod
-    def _convert_to_entity(self, model: BaseModel) -> BaseEntity:
+    def _convert_to_entity(self, model: UserModel) -> UserEntity:
         """Converts a SQLAlchemy model to a domain entity.
 
         This method converts a SQLAlchemy model instance to a corresponding domain entity
         instance.
 
         Args:
-            model (BaseModel): The SQLAlchemy model instance to be converted.
+            model (UserModel): The SQLAlchemy model instance to be converted.
 
         Returns:
-            BaseEntity: The converted instance of the domain entity.
+            UserEntity: The converted instance of the domain entity.
 
         """
 
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_by_id(self, id_: int) -> BaseEntity | None:
+    def get_by_id(self, id_: int) -> UserEntity | None:
         """Retrieve an entity by its identifier.
 
         Args:
             id_ (int): The identifier of the entity to retrieve.
 
         Returns:
-            BaseEntity | None: The entity with the specified identifier, or None if not found.
+            UserEntity | None: The entity with the specified identifier, or None if not found.
 
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_by_username(self, username: str) -> BaseEntity | None:
+    def get_by_username(self, username: str) -> UserEntity | None:
         """Retrieve an entity by its username.
 
         Args:
             username (str): The username of the entity to retrieve.
 
         Returns:
-            BaseEntity | None: The entity with the specified username, or None if not found.
+            UserEntity | None: The entity with the specified username, or None if not found.
 
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def create(self, entity: BaseEntity) -> None:
+    def create(self, entity: UserEntity) -> UserEntity:
         """Create a new entity in the repository.
 
         Args:
-            entity (BaseEntity): The entity to be created.
+            entity (UserEntity): The entity to be created.
 
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def update(self, entity: BaseEntity) -> None:
+    def update(self, entity: UserEntity) -> UserEntity:
         """Update an existing entity in the repository.
 
         Args:
-            entity (BaseEntity): The entity to be updated.
+            entity (UserEntity): The entity to be updated.
 
         """
         pass  # pragma: no cover

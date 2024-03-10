@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+from injector import inject, singleton
 from sqlalchemy import and_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -15,6 +16,7 @@ from pokeapi.infrastructure.database.models.token_whitelist import (
 )
 
 
+@singleton
 class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
     """Concrete implementation of the token whitelist repository.
 
@@ -26,6 +28,7 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
 
     """
 
+    @inject
     def __init__(self, db: Session) -> None:
         """Initializes the token whitelist repository.
 

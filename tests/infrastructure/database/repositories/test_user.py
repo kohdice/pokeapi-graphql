@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from unittest.mock import MagicMock
 
 import pytest
 from injector import Injector
@@ -9,6 +10,11 @@ from pokeapi.domain.entities.user import User as UserEntity
 from pokeapi.exceptions.user import UserCreationError, UserUpdateError
 from pokeapi.infrastructure.database.models import User as UserModel
 from pokeapi.infrastructure.database.repositories.user import UserRepository
+
+
+@pytest.fixture()
+def mock_session() -> MagicMock:
+    return MagicMock(spec=Session)
 
 
 @pytest.fixture(scope="module")
@@ -80,13 +86,20 @@ class TestUserRepository:
 
     @pytest.mark.usefixtures("_create_teardown")
     def test_create(self, repo: UserRepository) -> None:
-        repo.create(
-            UserEntity(id_=None, username="test_repository", password="password")
-        )
+        repo.create(UserEntity(username="test_repository", password="password"))
 
-    def test_create_with_error(self, repo: UserRepository) -> None:
+    def test_create_with_integrity_error(self, repo: UserRepository) -> None:
         with pytest.raises(UserCreationError):
-            repo.create(UserEntity(id_=None, username="Red", password="password"))
+            repo.create(UserEntity(username="Red", password="password"))
+
+    def test_create_with_creation_error(self, mock_session: MagicMock) -> None:
+        print(type(mock_session))
+        mock_session.execute.return_value = MagicMock()
+        mock_session.execute.return_value.inserted_primary_key = None
+        repo = UserRepository(mock_session)
+
+        with pytest.raises(UserCreationError):
+            repo.create(UserEntity(username="hoge", password="password"))
 
     def test_update(self, repo: UserRepository, update_setup: int) -> None:
         repo.update(UserEntity(id_=update_setup, username="Blue", password="password"))
@@ -101,3 +114,7 @@ class TestUserRepository:
             repo.update(
                 UserEntity(id_=update_setup, username="Red", password="password")
             )
+
+    def test_update_with_no_update(self, repo: UserRepository) -> None:
+        with pytest.raises(UserUpdateError):
+            repo.update(UserEntity(id_=0, username="no_update", password="password"))
