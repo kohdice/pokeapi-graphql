@@ -19,8 +19,18 @@ class MockTokenWhitelistRepository(TokenWhitelistRepositoryABC):
         self.__token = TokenWhitelistEntity(
             id_=1,
             user_id=1,
-            access_token="foo",
-            refresh_token="bar",
+            access_token="access_token",
+            refresh_token="refresh_token",
+            created_by="mock_user",
+            created_at=self.__now,
+            updated_by="mock_user",
+            updated_at=self.__now,
+        )
+        self.__no_user_token = TokenWhitelistEntity(
+            id_=1,
+            user_id=0,
+            access_token="access_token",
+            refresh_token="refresh_token",
             created_by="mock_user",
             created_at=self.__now,
             updated_by="mock_user",
@@ -33,16 +43,18 @@ class MockTokenWhitelistRepository(TokenWhitelistRepositoryABC):
     def get_by_access_token(  # type: ignore[override]
         self, entity: TokenWhitelistEntity, expiration: datetime.datetime
     ) -> TokenWhitelistEntity | None:
-        if entity.access_token == "foo":
+        if entity.access_token == "access_token":
             return self.__token
 
         return None
 
     def get_by_refresh_token(  # type: ignore[override]
-        self, entity: TokenWhitelistEntity, expiration: datetime.datetime
+        self, token: str, expiration: datetime.datetime
     ) -> TokenWhitelistEntity | None:
-        if entity.refresh_token == "bar":
+        if token == "refresh_token":
             return self.__token
+        elif token == "no_user_refresh_token":
+            return self.__no_user_token
 
         return None
 

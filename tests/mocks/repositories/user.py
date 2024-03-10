@@ -11,11 +11,11 @@ class MockUserRepository(UserRepositoryABC):
     def __init__(self) -> None:
         self.__user = UserEntity(id_=1, username="mock_user", password="")
 
-    def _convert_to_entity(self, model: UserModel) -> UserEntity:  # type: ignore[override]
+    def _convert_to_entity(self, model: UserModel) -> UserEntity:
         return self.__user
 
     def get_by_id(self, id_: int) -> UserEntity | None:
-        if id_ < 1:
+        if id_ > 0:
             return self.__user
 
         return None
@@ -26,8 +26,8 @@ class MockUserRepository(UserRepositoryABC):
 
         return None
 
-    def create(self, entity: UserEntity) -> None:  # type: ignore[override]
-        pass
+    def create(self, entity: UserEntity) -> UserEntity:
+        return self.__user
 
-    def update(self, entity: UserEntity) -> None:  # type: ignore[override]
-        pass
+    def update(self, entity: UserEntity) -> UserEntity:
+        return self.__user
