@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from pokeapi.domain.entities.base import BaseEntity
+from pokeapi.domain.entities.pokemon_ability import PokemonAbility
 
 
 class AbilityServiceABC(ABC):
@@ -12,24 +12,24 @@ class AbilityServiceABC(ABC):
     """
 
     @abstractmethod
-    def get_by_id(self, id_: int) -> BaseEntity | None:
+    def get_by_id(self, id_: int) -> PokemonAbility | None:
         """Retrieve a type by its identifier.
 
         Args:
             id_ (int): The identifier of the ability to retrieve.
 
         Returns:
-            BaseEntity | None: The ability with the specified identifier, or None if not found.
+            PokemonAbility | None: The ability with the specified identifier, or None if not found.
 
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_all(self) -> list[BaseEntity]:
+    def get_all(self) -> list[PokemonAbility]:
         """Retrieve all ability from the repository.
 
         Returns:
-            list[BaseEntity]: A list of all ability in the repository.
+            list[PokemonAbility]: A list of all ability in the repository.
 
         """
         pass  # pragma: no cover

@@ -1,7 +1,7 @@
 import datetime
 from abc import ABC, abstractmethod
 
-from pokeapi.domain.entities.base import BaseEntity
+from pokeapi.domain.entities.user import User
 
 
 class TokenServiceABC(ABC):
@@ -12,11 +12,11 @@ class TokenServiceABC(ABC):
     """
 
     @abstractmethod
-    def create_token(self, entity: BaseEntity, exp: datetime.datetime, jti: str) -> str:
+    def create_token(self, entity: User, exp: datetime.datetime, jti: str) -> str:
         """Create a JWT token.
 
         Args:
-            entity (BaseEntity): The entity to be used as the payload.
+            entity (User): The entity to be used as the payload.
             exp (datetime.datetime): The expiration date of the token.
             jti (str): The JWT ID.
 
