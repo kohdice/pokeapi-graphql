@@ -29,7 +29,7 @@ class TypeRepository(TypeRepositoryABC):
         """
         self._db = db
 
-    def _convert_to_entity(self, model: TypeMst) -> PokemonType:  # type: ignore[override]
+    def _convert_to_entity(self, model: TypeMst) -> PokemonType:
         """Converts a SQLAlchemy model to a domain entity.
 
         This method converts a SQLAlchemy model instance to a corresponding domain entity
@@ -66,7 +66,7 @@ class TypeRepository(TypeRepositoryABC):
 
         return self._convert_to_entity(result)
 
-    def get_all(self) -> list[PokemonType]:  # type: ignore[override]
+    def get_all(self) -> list[PokemonType]:
         """Retrieve all types.
 
         Returns:
