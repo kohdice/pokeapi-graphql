@@ -17,6 +17,10 @@ class TokenService(TokenServiceABC):
 
     token services to create and decode JWT tokens.
 
+    Attributes:
+        _config (AppConfigABC): The application configuration.
+        _logger (logging.Logger): The logger instance.
+
     """
 
     @inject

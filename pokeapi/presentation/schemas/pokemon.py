@@ -26,6 +26,8 @@ class Pokemon(relay.Node):
         special_defense (int): Base stat of Special Defense for this Pokémon.
         speed (int): Base stat of Special Speed for this Pokémon.
         base_total (int): Base total of stats for this Pokémon.
+        types (list[PokemonsType]): Type of Pokémon's Type
+        abilities (list[PokemonsAbility]): Ability of Pokémon's Ability
 
     """
 
