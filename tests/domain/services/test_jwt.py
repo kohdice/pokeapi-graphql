@@ -18,10 +18,8 @@ from tests.conftest import EXECUTION_DATETIME, ISSUE_DATETIME
 
 
 @pytest.fixture(scope="module")
-def service(dependency_container: Injector) -> JWTService:
-    config = dependency_container.get(AppConfig)
-
-    return JWTService(config)
+def service(container: Injector) -> JWTService:
+    return container.get(JWTService)
 
 
 @pytest.fixture(scope="module")
@@ -40,8 +38,8 @@ def dummy_private_key() -> str:
 
 @pytest.fixture(scope="module")
 @freeze_time(ISSUE_DATETIME)
-def exp(dependency_container: Injector) -> datetime.datetime:
-    config = dependency_container.get(AppConfig)
+def exp(container: Injector) -> datetime.datetime:
+    config = container.get(AppConfig)
     exp = datetime.datetime.utcnow() + datetime.timedelta(
         hours=config.access_token_lifetime
     )
@@ -62,12 +60,12 @@ def jti() -> str:
 @pytest.fixture(scope="module")
 @freeze_time(ISSUE_DATETIME)
 def access_token(
-    dependency_container: Injector,
+    container: Injector,
     exp: datetime.datetime,
     iat: datetime.datetime,
     jti: str,
 ) -> str:
-    config = dependency_container.get(AppConfig)
+    config = container.get(AppConfig)
 
     data = {
         "iss": config.app_domain,
@@ -87,12 +85,12 @@ def access_token(
 @pytest.fixture(scope="module")
 @freeze_time(ISSUE_DATETIME)
 def access_token_invalid_issuer(
-    dependency_container: Injector,
+    container: Injector,
     exp: datetime.datetime,
     iat: datetime.datetime,
     jti: str,
 ) -> str:
-    config = dependency_container.get(AppConfig)
+    config = container.get(AppConfig)
 
     data = {
         "iss": "hoge",
@@ -112,13 +110,13 @@ def access_token_invalid_issuer(
 @pytest.fixture(scope="module")
 @freeze_time(ISSUE_DATETIME)
 def access_token_invalid_signature(
-    dependency_container: Injector,
+    container: Injector,
     dummy_private_key: str,
     exp: datetime.datetime,
     iat: datetime.datetime,
     jti: str,
 ) -> str:
-    config = dependency_container.get(AppConfig)
+    config = container.get(AppConfig)
 
     data = {
         "iss": config.app_domain,
@@ -138,11 +136,11 @@ def access_token_invalid_signature(
 @pytest.fixture(scope="module")
 @freeze_time(ISSUE_DATETIME)
 def access_token_no_jti(
-    dependency_container: Injector,
+    container: Injector,
     exp: datetime.datetime,
     iat: datetime.datetime,
 ) -> str:
-    config = dependency_container.get(AppConfig)
+    config = container.get(AppConfig)
 
     data = {
         "iss": config.app_domain,
@@ -188,14 +186,14 @@ class TestJWTServices:
     @freeze_time(EXECUTION_DATETIME)
     def test_decode_token(
         self,
-        dependency_container: Injector,
+        container: Injector,
         service: JWTService,
         exp: datetime.datetime,
         iat: datetime.datetime,
         jti: str,
         access_token: str,
     ) -> None:
-        config = dependency_container.get(AppConfig)
+        config = container.get(AppConfig)
         actual = service.decode_token(access_token)
 
         assert actual["iss"] == config.app_domain

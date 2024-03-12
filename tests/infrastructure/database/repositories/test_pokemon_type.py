@@ -2,33 +2,25 @@ import pytest
 from injector import Injector
 from pytest_mock import MockerFixture
 from sqlalchemy import ScalarResult
-from sqlalchemy.orm import Session
 
-from pokeapi.domain.entities.pokemon_type import PokemonType
 from pokeapi.infrastructure.database.models.type_mst import TypeMst
 from pokeapi.infrastructure.database.repositories.pokemon_type import TypeRepository
+from tests.conftest import TEST_POKEMON_TYPE_ENTITY
 
-TEST_MODEL = TypeMst(
-    id_=1,
-    type_="ノーマル",
-)
-
-TEST_ENTITY = PokemonType(id_=1, name="ノーマル")
+TEST_MODEL = TypeMst(id_=1, type_="ノーマル")
 
 
 @pytest.fixture(scope="module")
-def repo(dependency_container: Injector) -> TypeRepository:
-    session = dependency_container.get(Session)
-
-    return TypeRepository(session)
+def repo(container: Injector) -> TypeRepository:
+    return container.get(TypeRepository)
 
 
 class TestTypeRepository:
     def test_convert_to_entity(self, repo: TypeRepository) -> None:
-        assert repo._convert_to_entity(TEST_MODEL) == TEST_ENTITY
+        assert repo._convert_to_entity(TEST_MODEL) == TEST_POKEMON_TYPE_ENTITY
 
     def test_get_by_id(self, repo: TypeRepository) -> None:
-        assert repo.get_by_id(1) == TEST_ENTITY
+        assert repo.get_by_id(1) == TEST_POKEMON_TYPE_ENTITY
 
     def test_get_by_id_not_found(self, repo: TypeRepository) -> None:
         assert repo.get_by_id(0) is None
@@ -38,7 +30,7 @@ class TestTypeRepository:
 
         assert actual
         assert len(actual) == 18
-        assert actual[0] == TEST_ENTITY
+        assert actual[0] == TEST_POKEMON_TYPE_ENTITY
 
     def test_get_all_empty(self, repo: TypeRepository, mocker: MockerFixture) -> None:
         mocker.patch.object(ScalarResult, "all", return_value=[])

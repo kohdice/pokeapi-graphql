@@ -1,10 +1,13 @@
 import datetime
 from collections.abc import Generator
+from unittest.mock import MagicMock
 
 import pytest
 from freezegun import freeze_time
 from injector import Injector
+from pytest_mock import MockerFixture
 from sqlalchemy import and_, delete, insert, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from pokeapi.domain.entities.token_whitelist import (
@@ -18,21 +21,22 @@ from pokeapi.infrastructure.database.models.users import User
 from pokeapi.infrastructure.database.repositories.token_whitelist import (
     TokenWhitelistRepository,
 )
-
-ISSUANCE_DATE = datetime.datetime(2000, 1, 1, 1, 0, 0)
-EXECUTION_DATE = datetime.datetime(2000, 1, 1, 1, 10, 0)
+from tests.conftest import EXECUTION_DATETIME, ISSUE_DATETIME
 
 
 @pytest.fixture(scope="module")
-def repo(dependency_container: Injector) -> TokenWhitelistRepository:
-    session = dependency_container.get(Session)
+def repo(container: Injector) -> TokenWhitelistRepository:
+    return container.get(TokenWhitelistRepository)
 
-    return TokenWhitelistRepository(session)
+
+@pytest.fixture()
+def mock_session() -> MagicMock:
+    return MagicMock(spec=Session)
 
 
 @pytest.fixture(scope="module")
-def setup_user(dependency_container: Injector) -> Generator:
-    session = dependency_container.get(Session)
+def setup_for_user(container: Injector) -> Generator:
+    session = container.get(Session)
     record = session.execute(
         insert(User).values(
             username="test_repository",
@@ -51,20 +55,20 @@ def setup_user(dependency_container: Injector) -> Generator:
 
 
 @pytest.fixture()
-def setup_token(
-    dependency_container: Injector,
-    setup_user: int,
+def setup_for_token(
+    container: Injector,
+    setup_for_user: int,
 ) -> Generator:
-    session = dependency_container.get(Session)
+    session = container.get(Session)
     record = session.execute(
         insert(TokenWhitelistModel).values(
-            user_id=setup_user,
+            user_id=setup_for_user,
             access_token="foo",
             refresh_token="bar",
             created_by="test_repository",
-            created_at=ISSUANCE_DATE,
+            created_at=ISSUE_DATETIME,
             updated_by="test_repository",
-            updated_at=ISSUANCE_DATE,
+            updated_at=ISSUE_DATETIME,
         )
     )
     assert record.inserted_primary_key is not None
@@ -81,12 +85,12 @@ def setup_token(
 
 
 @pytest.fixture()
-def _create_teardown(dependency_container: Injector, setup_user: int) -> Generator:
+def _teardown_for_create(container: Injector, setup_for_user: int) -> Generator:
     yield
 
-    session = dependency_container.get(Session)
+    session = container.get(Session)
     session.execute(
-        delete(TokenWhitelistModel).where(TokenWhitelistModel.user_id == setup_user)
+        delete(TokenWhitelistModel).where(TokenWhitelistModel.user_id == setup_for_user)
     )
     session.commit()
 
@@ -100,9 +104,9 @@ class TestTokenWhitelistRepository:
                 access_token="foo",
                 refresh_token="bar",
                 created_by="test_repository",
-                created_at=ISSUANCE_DATE,
+                created_at=ISSUE_DATETIME,
                 updated_by="test_repository",
-                updated_at=ISSUANCE_DATE,
+                updated_at=ISSUE_DATETIME,
             )
         )
         assert isinstance(actual, TokenWhitelistEntity)
@@ -111,16 +115,16 @@ class TestTokenWhitelistRepository:
         assert actual.access_token == "foo"
         assert actual.refresh_token == "bar"
 
-    @pytest.mark.usefixtures("setup_token")
-    @freeze_time(EXECUTION_DATE)
+    @pytest.mark.usefixtures("setup_for_token")
+    @freeze_time(EXECUTION_DATETIME)
     def test_get_by_access_token(
-        self, repo: TokenWhitelistRepository, setup_user: int
+        self, repo: TokenWhitelistRepository, setup_for_user: int
     ) -> None:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
         actual = repo.get_by_access_token(
             TokenWhitelistEntity(
                 id_=None,
-                user_id=setup_user,
+                user_id=setup_for_user,
                 access_token="foo",
                 refresh_token=None,
                 created_by="test_repository",
@@ -132,7 +136,7 @@ class TestTokenWhitelistRepository:
         )
 
         assert isinstance(actual, TokenWhitelistEntity)
-        assert actual.user_id == setup_user
+        assert actual.user_id == setup_for_user
         assert actual.access_token == "foo"
 
     def test_get_by_access_token_not_found(
@@ -155,16 +159,16 @@ class TestTokenWhitelistRepository:
 
         assert actual is None
 
-    @pytest.mark.usefixtures("setup_token")
-    @freeze_time(EXECUTION_DATE)
+    @pytest.mark.usefixtures("setup_for_token")
+    @freeze_time(EXECUTION_DATETIME)
     def test_get_by_refresh_token(
-        self, repo: TokenWhitelistRepository, setup_user: int
+        self, repo: TokenWhitelistRepository, setup_for_user: int
     ) -> None:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
         actual = repo.get_by_refresh_token(
             TokenWhitelistEntity(
                 id_=None,
-                user_id=setup_user,
+                user_id=setup_for_user,
                 access_token=None,
                 refresh_token="bar",
                 created_by="test_repository",
@@ -176,7 +180,7 @@ class TestTokenWhitelistRepository:
         )
 
         assert isinstance(actual, TokenWhitelistEntity)
-        assert actual.user_id == setup_user
+        assert actual.user_id == setup_for_user
         assert actual.refresh_token == "bar"
 
     def test_get_by_refresh_token_not_found(
@@ -199,17 +203,16 @@ class TestTokenWhitelistRepository:
 
         assert actual is None
 
-    @pytest.mark.usefixtures("_create_teardown")
-    @freeze_time(ISSUANCE_DATE)
+    @pytest.mark.usefixtures("_teardown_for_create")
+    @freeze_time(ISSUE_DATETIME)
     def test_create(
         self,
-        dependency_container: Injector,
         repo: TokenWhitelistRepository,
-        setup_user: int,
+        setup_for_user: int,
     ) -> None:
         entity = TokenWhitelistEntity(
             id_=None,
-            user_id=setup_user,
+            user_id=setup_for_user,
             access_token="foo",
             refresh_token="bar",
             created_by="test_repository",
@@ -218,19 +221,13 @@ class TestTokenWhitelistRepository:
             updated_at=datetime.datetime.now(),
         )
 
-        repo.create(entity)
+        actual = repo.create(entity)
 
-        session = dependency_container.get(Session)
-        actual = session.execute(
-            select(TokenWhitelistModel).where(TokenWhitelistModel.user_id == setup_user)
-        ).scalar()
-
-        assert actual is not None
-        assert actual.user_id == setup_user
+        assert actual.user_id == setup_for_user
         assert actual.access_token == "foo"
         assert actual.refresh_token == "bar"
 
-    def test_create_with_error(
+    def test_create_with_integrity_error(
         self,
         repo: TokenWhitelistRepository,
     ) -> None:
@@ -248,16 +245,35 @@ class TestTokenWhitelistRepository:
         with pytest.raises(TokenRegistrationError):
             repo.create(entity)
 
+    def test_create_with_creation_error(self, mock_session: MagicMock) -> None:
+        print(type(mock_session))
+        mock_session.execute.return_value = MagicMock()
+        mock_session.execute.return_value.inserted_primary_key = None
+        repo = TokenWhitelistRepository(mock_session)
+        entity = TokenWhitelistEntity(
+            id_=None,
+            user_id=0,
+            access_token="foo",
+            refresh_token="bar",
+            created_by="test_repository",
+            created_at=datetime.datetime.now(),
+            updated_by="test_repository",
+            updated_at=datetime.datetime.now(),
+        )
+
+        with pytest.raises(TokenRegistrationError):
+            repo.create(entity)
+
     def test_update(
         self,
-        dependency_container: Injector,
+        container: Injector,
         repo: TokenWhitelistRepository,
-        setup_user: int,
-        setup_token: int,
+        setup_for_user: int,
+        setup_for_token: int,
     ) -> None:
         entity = TokenWhitelistEntity(
-            id_=setup_token,
-            user_id=setup_user,
+            id_=setup_for_token,
+            user_id=setup_for_user,
             access_token="baz",
             refresh_token="qux",
             created_by="test_repository",
@@ -267,37 +283,23 @@ class TestTokenWhitelistRepository:
         )
         repo.update(entity)
 
-        session = dependency_container.get(Session)
+        session = container.get(Session)
         actual = session.execute(
-            select(TokenWhitelistModel).where(TokenWhitelistModel.id_ == setup_token)
+            select(TokenWhitelistModel).where(
+                TokenWhitelistModel.id_ == setup_for_token
+            )
         ).scalar()
 
         assert actual is not None
-        assert actual.user_id == setup_user
+        assert actual.user_id == setup_for_user
         assert actual.access_token == "baz"
         assert actual.refresh_token == "qux"
 
-    def test_update_with_error(
-        self, repo: TokenWhitelistRepository, setup_user: int
+    def test_update_integrity_error(
+        self, repo: TokenWhitelistRepository, mocker: MockerFixture
     ) -> None:
         entity = TokenWhitelistEntity(
             id_=0,
-            user_id=setup_user,
-            access_token="baz",
-            refresh_token="qux",
-            created_by="test_repository",
-            created_at=datetime.datetime.now(),
-            updated_by="test_repository",
-            updated_at=datetime.datetime.now(),
-        )
-        with pytest.raises(TokenUpdateError):
-            repo.update(entity)
-
-    def test_update_with_user_error(
-        self, repo: TokenWhitelistRepository, setup_token: int
-    ) -> None:
-        entity = TokenWhitelistEntity(
-            id_=setup_token,
             user_id=0,
             access_token="baz",
             refresh_token="qux",
@@ -306,25 +308,47 @@ class TestTokenWhitelistRepository:
             updated_by="test_repository",
             updated_at=datetime.datetime.now(),
         )
+        mocker.patch.object(
+            Session, "execute", side_effect=IntegrityError(None, None, Exception())
+        )
+
         with pytest.raises(TokenUpdateError):
             repo.update(entity)
 
-    @pytest.mark.usefixtures("setup_token")
+    def test_update_with_result_zero_error(self, mock_session: MagicMock) -> None:
+        mock_session.execute.return_value = MagicMock()
+        mock_session.execute.return_value.rowcount = 0
+        repo = TokenWhitelistRepository(mock_session)
+        entity = TokenWhitelistEntity(
+            id_=0,
+            user_id=0,
+            access_token="baz",
+            refresh_token="qux",
+            created_by="test_repository",
+            created_at=datetime.datetime.now(),
+            updated_by="test_repository",
+            updated_at=datetime.datetime.now(),
+        )
+
+        with pytest.raises(TokenUpdateError):
+            repo.update(entity)
+
+    @pytest.mark.usefixtures("setup_for_token")
     @freeze_time("2999-01-01 01:00:00")
     def test_delete(
         self,
-        dependency_container: Injector,
+        container: Injector,
         repo: TokenWhitelistRepository,
-        setup_user: int,
+        setup_for_user: int,
     ) -> None:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
-        repo.delete(setup_user, expiration)
+        repo.delete(setup_for_user, expiration)
 
-        session = dependency_container.get(Session)
+        session = container.get(Session)
         actual = session.execute(
             select(TokenWhitelistModel).where(
                 and_(
-                    TokenWhitelistModel.user_id == setup_user,
+                    TokenWhitelistModel.user_id == setup_for_user,
                     TokenWhitelistModel.deleted_at.isnot(None),
                 )
             )

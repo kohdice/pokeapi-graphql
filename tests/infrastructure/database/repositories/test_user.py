@@ -12,30 +12,19 @@ from pokeapi.infrastructure.database.models import User as UserModel
 from pokeapi.infrastructure.database.repositories.user import UserRepository
 
 
+@pytest.fixture(scope="module")
+def repo(container: Injector) -> UserRepository:
+    return container.get(UserRepository)
+
+
 @pytest.fixture()
 def mock_session() -> MagicMock:
     return MagicMock(spec=Session)
 
 
-@pytest.fixture(scope="module")
-def repo(dependency_container: Injector) -> UserRepository:
-    session = dependency_container.get(Session)
-
-    return UserRepository(session)
-
-
 @pytest.fixture()
-def _create_teardown(dependency_container: Injector) -> Generator:
-    yield
-
-    session = dependency_container.get(Session)
-    session.execute(delete(UserModel).where(UserModel.created_by == "test_repository"))
-    session.commit()
-
-
-@pytest.fixture()
-def update_setup(dependency_container: Injector) -> Generator:
-    session = dependency_container.get(Session)
+def setup_for_user(container: Injector) -> Generator:
+    session = container.get(Session)
     record = session.execute(
         insert(UserModel).values(
             username="test_repository",
@@ -52,6 +41,15 @@ def update_setup(dependency_container: Injector) -> Generator:
     session.execute(
         delete(UserModel).where(UserModel.id_ == record.inserted_primary_key[0])
     )
+    session.commit()
+
+
+@pytest.fixture()
+def _teardown_for_create(container: Injector) -> Generator:
+    yield
+
+    session = container.get(Session)
+    session.execute(delete(UserModel).where(UserModel.created_by == "test_repository"))
     session.commit()
 
 
@@ -84,9 +82,14 @@ class TestUserRepository:
     def test_get_by_username_not_found(self, repo: UserRepository) -> None:
         assert repo.get_by_username("hoge") is None
 
-    @pytest.mark.usefixtures("_create_teardown")
+    @pytest.mark.usefixtures("_teardown_for_create")
     def test_create(self, repo: UserRepository) -> None:
-        repo.create(UserEntity(username="test_repository", password="password"))
+        actual = repo.create(
+            UserEntity(username="test_repository", password="password")
+        )
+
+        assert actual.username == "test_repository"
+        assert actual.password == "password"
 
     def test_create_with_integrity_error(self, repo: UserRepository) -> None:
         with pytest.raises(UserCreationError):
@@ -101,18 +104,20 @@ class TestUserRepository:
         with pytest.raises(UserCreationError):
             repo.create(UserEntity(username="hoge", password="password"))
 
-    def test_update(self, repo: UserRepository, update_setup: int) -> None:
-        repo.update(UserEntity(id_=update_setup, username="Blue", password="password"))
+    def test_update(self, repo: UserRepository, setup_for_user: int) -> None:
+        repo.update(
+            UserEntity(id_=setup_for_user, username="Blue", password="password")
+        )
 
-        actual = repo.get_by_id(update_setup)
+        actual = repo.get_by_id(setup_for_user)
 
         assert isinstance(actual, UserEntity)
         assert actual.username == "Blue"
 
-    def test_update_with_error(self, repo: UserRepository, update_setup: int) -> None:
+    def test_update_with_error(self, repo: UserRepository, setup_for_user: int) -> None:
         with pytest.raises(UserUpdateError):
             repo.update(
-                UserEntity(id_=update_setup, username="Red", password="password")
+                UserEntity(id_=setup_for_user, username="Red", password="password")
             )
 
     def test_update_with_no_update(self, repo: UserRepository) -> None:
