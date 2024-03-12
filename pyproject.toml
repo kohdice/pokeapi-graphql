@@ -110,15 +110,7 @@ testpaths = ["tests"]
 # TODO: Once tests for data manipulation are implemented,
 # they should be removed from the list of excluded tests
 [tool.coverage.run]
-omit = [
-  "tests/*",
-  ".venv/*",
-  "migrations/*",
-  "pokeapi/domain/entities/token_whitelist.py",
-  "pokeapi/domain/entities/user.py",
-  "pokeapi/infrastructure/database/models/token_whitelist.py",
-  "pokeapi/infrastructure/database/models/users.py",
-]
+omit = ["tests/*", ".venv/*", "migrations/*"]
 
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
