@@ -123,7 +123,6 @@ class TestTokenWhitelistRepository:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
         actual = repo.get_by_access_token(
             TokenWhitelistEntity(
-                id_=None,
                 user_id=setup_for_user,
                 access_token="foo",
                 refresh_token=None,
@@ -145,7 +144,6 @@ class TestTokenWhitelistRepository:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
         actual = repo.get_by_access_token(
             TokenWhitelistEntity(
-                id_=None,
                 user_id=0,
                 access_token="foo",
                 refresh_token=None,
@@ -167,7 +165,6 @@ class TestTokenWhitelistRepository:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
         actual = repo.get_by_refresh_token(
             TokenWhitelistEntity(
-                id_=None,
                 user_id=setup_for_user,
                 access_token=None,
                 refresh_token="bar",
@@ -189,7 +186,6 @@ class TestTokenWhitelistRepository:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
         actual = repo.get_by_refresh_token(
             TokenWhitelistEntity(
-                id_=None,
                 user_id=0,
                 access_token=None,
                 refresh_token="bar",
@@ -211,7 +207,6 @@ class TestTokenWhitelistRepository:
         setup_for_user: int,
     ) -> None:
         entity = TokenWhitelistEntity(
-            id_=None,
             user_id=setup_for_user,
             access_token="foo",
             refresh_token="bar",
@@ -232,7 +227,6 @@ class TestTokenWhitelistRepository:
         repo: TokenWhitelistRepository,
     ) -> None:
         entity = TokenWhitelistEntity(
-            id_=None,
             user_id=0,
             access_token="foo",
             refresh_token="bar",
@@ -251,7 +245,6 @@ class TestTokenWhitelistRepository:
         mock_session.execute.return_value.inserted_primary_key = None
         repo = TokenWhitelistRepository(mock_session)
         entity = TokenWhitelistEntity(
-            id_=None,
             user_id=0,
             access_token="foo",
             refresh_token="bar",
