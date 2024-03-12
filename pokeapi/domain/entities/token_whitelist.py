@@ -7,7 +7,7 @@ class TokenWhitelist(BaseEntity):
     """Entity class of TokenWhitelist.
 
     Attributes:
-        id_ (int | None): The id of the TokenWhitelist.
+        id_ (int): The id of the TokenWhitelist.
         user_id (int): The user_id of the TokenWhitelist.
         access_token (str | None): The access_token of the TokenWhitelist.
         refresh_token (str | None): The refresh_token of the TokenWhitelist.
@@ -20,7 +20,7 @@ class TokenWhitelist(BaseEntity):
 
     """
 
-    id_: int | None
+    id_: int = 0
     user_id: int
     access_token: str | None
     refresh_token: str | None
