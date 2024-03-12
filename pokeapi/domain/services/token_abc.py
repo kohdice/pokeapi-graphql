@@ -39,7 +39,7 @@ class TokenServiceABC(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def delete(self, entity: User, whitelist_id: int) -> None:
+    def delete(self, entity: User) -> None:
         """Delete a token for the given entity.
 
         Args:
