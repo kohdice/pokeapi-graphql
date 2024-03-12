@@ -176,7 +176,7 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
         """
         statement = (
             update(TokenWhitelistModel)
-            .where(TokenWhitelistModel.user_id == entity.user_id)
+            .where(TokenWhitelistModel.id_ == entity.id_)
             .values(
                 access_token=entity.access_token,
                 refresh_token=entity.refresh_token,
@@ -202,7 +202,7 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
             raise TokenUpdateError("Failed to update token") from None
 
         read_statement = select(TokenWhitelistModel).where(
-            TokenWhitelistModel.user_id == entity.user_id
+            TokenWhitelistModel.id_ == entity.id_
         )
         updated_token_whitelist = self._db.execute(read_statement).scalar_one()
 
