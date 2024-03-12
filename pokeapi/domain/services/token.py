@@ -72,7 +72,6 @@ class TokenService(TokenServiceABC):
 
         self._whitelist_repo.create(
             entity=TokenWhitelist(
-                id_=None,
                 user_id=entity.id_,
                 access_token=jti,
                 refresh_token=refresh_token,
