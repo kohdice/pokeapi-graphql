@@ -2,7 +2,7 @@ import strawberry
 from strawberry import relay
 from strawberry.types import Info
 
-from pokeapi.application.services.pokemon_type_abc import TypeServiceABC
+from pokeapi.application.services.pokemon_type import TypeService
 from pokeapi.domain.entities.pokemon_type import PokemonType as PokemonTypeEntity
 from pokeapi.exceptions.pokemon_type import TypeNotFoundError
 
@@ -52,7 +52,7 @@ class PokemonType(relay.Node):
 
         """
         container = info.context["container"]
-        service = container.get(TypeServiceABC)
+        service = container.get(TypeService)
         entity = service.get_by_id(int(node_id))
 
         if entity is None:
