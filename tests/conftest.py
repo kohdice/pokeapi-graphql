@@ -21,6 +21,8 @@ from pokeapi.domain.entities.pokemon_stats import PokemonStats
 from pokeapi.domain.entities.pokemon_type import PokemonType
 from pokeapi.domain.entities.pokemons_ability import PokemonsAbility
 from pokeapi.domain.entities.pokemons_type import PokemonsType
+from pokeapi.domain.entities.token import Token
+from pokeapi.domain.entities.token_whitelist import TokenWhitelist
 from pokeapi.domain.entities.user import User
 from pokeapi.domain.repositories.pokemon import PokemonRepositoryABC
 from pokeapi.domain.repositories.pokemon_ability import AbilityRepositoryABC
@@ -31,6 +33,8 @@ from pokeapi.domain.services.jwt import JWTService
 from pokeapi.domain.services.jwt_abc import JWTServiceABC
 from pokeapi.domain.services.password import PasswordService
 from pokeapi.domain.services.password_abc import PasswordServiceABC
+from pokeapi.domain.services.token import TokenService
+from pokeapi.domain.services.token_abc import TokenServiceABC
 from pokeapi.infrastructure.database.db import session_factory
 from pokeapi.infrastructure.database.repositories.pokemon import PokemonRepository
 from pokeapi.infrastructure.database.repositories.pokemon_ability import (
@@ -95,6 +99,19 @@ TEST_POKEMON_ENTITY = Pokemon(
 TEST_POKEMON_ABILITY_ENTITY = PokemonAbility(id_=1, name="あくしゅう")
 TEST_POKEMON_TYPE_ENTITY = PokemonType(id_=1, name="ノーマル")
 TEST_USER_ENTITY = User(id_=1, username="Red", password="hashed_password")
+TEST_TOKEN_ENTITY = Token(
+    access_token="access_token", refresh_token="refresh_token", token_type="Bearer"
+)
+TEST_TOKEN_WHITELIST_ENTITY = TokenWhitelist(
+    id_=1,
+    user_id=1,
+    access_token="access_token",
+    refresh_token="refresh_token",
+    created_by="Red",
+    created_at=ISSUE_DATETIME,
+    updated_by="Red",
+    updated_at=ISSUE_DATETIME,
+)
 
 
 @pytest.fixture(scope="session")
@@ -134,6 +151,11 @@ def container() -> Injector:
         binder.bind(
             JWTServiceABC,  # type: ignore
             to=MagicMock(spec=JWTService, autospec=True),
+            scope=singleton,
+        )
+        binder.bind(
+            TokenServiceABC,  # type: ignore
+            to=MagicMock(spec=TokenService, autospec=True),
             scope=singleton,
         )
 
