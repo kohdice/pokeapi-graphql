@@ -29,7 +29,7 @@ class AbilityRepository(AbilityRepositoryABC):
         """
         self._db = db
 
-    def _convert_to_entity(self, model: AbilityMst) -> PokemonAbility:  # type: ignore[override]
+    def _convert_to_entity(self, model: AbilityMst) -> PokemonAbility:
         """Converts a SQLAlchemy model to a domain entity.
 
         This method converts a SQLAlchemy model instance to a corresponding domain entity
@@ -66,7 +66,7 @@ class AbilityRepository(AbilityRepositoryABC):
 
         return self._convert_to_entity(result)
 
-    def get_all(self) -> list[PokemonAbility]:  # type: ignore[override]
+    def get_all(self) -> list[PokemonAbility]:
         """Retrieve all abilities.
 
         Returns:

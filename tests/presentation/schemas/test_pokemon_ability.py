@@ -1,37 +1,34 @@
+from unittest.mock import MagicMock
+
 import pytest
 
-from pokeapi.domain.entities.pokemon_ability import (
-    PokemonAbility as PokemonAbilityEntity,
-)
+from pokeapi.application.services.pokemon_ability import AbilityService
 from pokeapi.exceptions.pokemon_ability import AbilityNotFoundError
-from pokeapi.presentation.schemas.pokemon_ability import (
-    PokemonAbility as PokemonAbilitySchema,
-)
+from pokeapi.presentation.schemas.pokemon_ability import PokemonAbility
+from tests.conftest import TEST_POKEMON_ABILITY_ENTITY
 
 from .conftest import MockInfo
 
-TEST_ENTITY = PokemonAbilityEntity(
-    id_=1,
-    name="あくしゅう",
-)
-
-TEST_SCHEMA = PokemonAbilitySchema(
-    id=1,
-    ability_name="あくしゅう",
-)
+TEST_SCHEMA = PokemonAbility(id=1, ability_name="あくしゅう")
 
 
 class TestPokemonType:
     def test_from_entity(self) -> None:
-        assert PokemonAbilitySchema.from_entity(TEST_ENTITY) == TEST_SCHEMA
+        assert PokemonAbility.from_entity(TEST_POKEMON_ABILITY_ENTITY) == TEST_SCHEMA
 
     def test_resolve_node(self, mock_info: MockInfo) -> None:
-        actual = PokemonAbilitySchema.resolve_node("1", info=mock_info)  # type: ignore
+        mock_info.context["container"].get(AbilityService).get_by_id = MagicMock(
+            return_value=TEST_POKEMON_ABILITY_ENTITY
+        )
+        actual = PokemonAbility.resolve_node("1", info=mock_info)  # type: ignore
 
-        assert isinstance(actual, PokemonAbilitySchema)
+        assert isinstance(actual, PokemonAbility)
         assert actual.id == 1
-        assert actual.ability_name == "mock_1"
+        assert actual.ability_name == "あくしゅう"
 
     def test_resolve_node_type_not_found(self, mock_info: MockInfo) -> None:
+        mock_info.context["container"].get(AbilityService).get_by_id = MagicMock(
+            return_value=None
+        )
         with pytest.raises(AbilityNotFoundError):
-            PokemonAbilitySchema.resolve_node("0", info=mock_info)  # type: ignore
+            PokemonAbility.resolve_node("0", info=mock_info)  # type: ignore

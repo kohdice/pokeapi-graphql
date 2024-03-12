@@ -83,7 +83,7 @@ class TestAppConfig:
         with pytest.raises(UnsetEnvironmentVariableError):
             config._load_private_key()
 
-    def test_load_private_key(self, config: AppConfig, mocker: MockerFixture) -> None:
+    def test_load_private_key(self, config: AppConfig) -> None:
         actual_1 = config._load_private_key()
         actual_2 = config._load_private_key()
 
@@ -91,7 +91,7 @@ class TestAppConfig:
         assert isinstance(actual_2, str)
         assert actual_1 == actual_2
 
-    def test_private_key(self, config: AppConfig, mocker: MockerFixture) -> None:
+    def test_private_key(self, config: AppConfig) -> None:
         assert isinstance(config.private_key, str)
 
     def test_load_public_key_with_error(
@@ -102,7 +102,7 @@ class TestAppConfig:
         with pytest.raises(UnsetEnvironmentVariableError):
             config._load_public_key()
 
-    def test_load_public_key(self, config: AppConfig, mocker: MockerFixture) -> None:
+    def test_load_public_key(self, config: AppConfig) -> None:
         actual_1 = config._load_public_key()
         actual_2 = config._load_public_key()
 
@@ -110,7 +110,7 @@ class TestAppConfig:
         assert isinstance(actual_2, str)
         assert actual_1 == actual_2
 
-    def test_public_key(self, config: AppConfig, mocker: MockerFixture) -> None:
+    def test_public_key(self, config: AppConfig) -> None:
         assert isinstance(config.public_key, str)
 
     def test_jwt_algorithm(self, config: AppConfig, mocker: MockerFixture) -> None:

@@ -19,11 +19,10 @@ class UserRepository(UserRepositoryABC):
     SQLAlchemy to interact with the database.
 
     Attributes:
+        _logger (Logger): The logger instance used by the repository.
         _db (Session): The database session to be used by the repository.
 
     """
-
-    LOGGER = logging.getLogger(__name__)
 
     @inject
     def __init__(self, db: Session) -> None:
@@ -33,6 +32,7 @@ class UserRepository(UserRepositoryABC):
             db (Session): The database session object used by the repository.
 
         """
+        self._logger = logging.getLogger(__name__)
         self._db = db
 
     def _convert_to_entity(self, model: UserModel) -> UserEntity:
@@ -119,7 +119,7 @@ class UserRepository(UserRepositoryABC):
             self._db.commit()
         except IntegrityError as e:
             self._db.rollback()
-            self.LOGGER.error(e)
+            self._logger.error(e)
             raise UserCreationError("Failed to create user") from None
 
         if result.inserted_primary_key is None:
@@ -157,11 +157,11 @@ class UserRepository(UserRepositoryABC):
             self._db.commit()
         except IntegrityError as e:
             self._db.rollback()
-            self.LOGGER.error(e)
+            self._logger.error(e)
             raise UserUpdateError("Failed to update user") from None
 
         if result.rowcount == 0:
-            self.LOGGER.error(
+            self._logger.error(
                 UserUpdateError(f"Failed to update user. user_id: {entity.id_}")
             )
             raise UserUpdateError("Failed to update user.")

@@ -1,33 +1,34 @@
+from unittest.mock import MagicMock
+
 import pytest
 
-from pokeapi.domain.entities.pokemon_type import PokemonType as PokemonTypeEntity
+from pokeapi.application.services.pokemon_type import TypeService
 from pokeapi.exceptions.pokemon_type import TypeNotFoundError
-from pokeapi.presentation.schemas.pokemon_type import PokemonType as PokemonTypeSchema
+from pokeapi.presentation.schemas.pokemon_type import PokemonType
+from tests.conftest import TEST_POKEMON_TYPE_ENTITY
 
 from .conftest import MockInfo
 
-TEST_ENTITY = PokemonTypeEntity(
-    id_=1,
-    name="ノーマル",
-)
-
-TEST_SCHEMA = PokemonTypeSchema(
-    id=1,
-    type_name="ノーマル",
-)
+TEST_SCHEMA = PokemonType(id=1, type_name="ノーマル")
 
 
 class TestPokemonType:
     def test_from_entity(self) -> None:
-        assert PokemonTypeSchema.from_entity(TEST_ENTITY) == TEST_SCHEMA
+        assert PokemonType.from_entity(TEST_POKEMON_TYPE_ENTITY) == TEST_SCHEMA
 
     def test_resolve_node(self, mock_info: MockInfo) -> None:
-        actual = PokemonTypeSchema.resolve_node("1", info=mock_info)  # type: ignore
+        mock_info.context["container"].get(TypeService).get_by_id = MagicMock(
+            return_value=TEST_POKEMON_TYPE_ENTITY
+        )
+        actual = PokemonType.resolve_node("1", info=mock_info)  # type: ignore
 
-        assert isinstance(actual, PokemonTypeSchema)
+        assert isinstance(actual, PokemonType)
         assert actual.id == 1
-        assert actual.type_name == "mock_1"
+        assert actual.type_name == "ノーマル"
 
     def test_resolve_node_type_not_found(self, mock_info: MockInfo) -> None:
+        mock_info.context["container"].get(TypeService).get_by_id = MagicMock(
+            return_value=None
+        )
         with pytest.raises(TypeNotFoundError):
-            PokemonTypeSchema.resolve_node("0", info=mock_info)  # type: ignore
+            PokemonType.resolve_node("0", info=mock_info)  # type: ignore

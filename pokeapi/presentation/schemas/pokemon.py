@@ -2,7 +2,7 @@ import strawberry
 from strawberry import relay
 from strawberry.types import Info
 
-from pokeapi.application.services.pokemon_abc import PokemonServiceABC
+from pokeapi.application.services.pokemon import PokemonService
 from pokeapi.domain.entities.pokemon import Pokemon as PokemonEntity
 from pokeapi.exceptions.pokemon import PokemonNotFoundError
 from pokeapi.presentation.schemas.pokemon_ability import PokemonAbility
@@ -26,6 +26,8 @@ class Pokemon(relay.Node):
         special_defense (int): Base stat of Special Defense for this Pokémon.
         speed (int): Base stat of Special Speed for this Pokémon.
         base_total (int): Base total of stats for this Pokémon.
+        types (list[PokemonsType]): Type of Pokémon's Type
+        abilities (list[PokemonsAbility]): Ability of Pokémon's Ability
 
     """
 
@@ -121,7 +123,7 @@ class Pokemon(relay.Node):
 
         """
         container = info.context["container"]
-        service = container.get(PokemonServiceABC)
+        service = container.get(PokemonService)
         entity = service.get_by_id(int(node_id))
 
         if entity is None:

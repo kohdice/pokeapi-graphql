@@ -1,5 +1,7 @@
 from injector import Binder, Module, singleton
 
+from pokeapi.domain.services.jwt import JWTService
+from pokeapi.domain.services.jwt_abc import JWTServiceABC
 from pokeapi.domain.services.password import PasswordService
 from pokeapi.domain.services.password_abc import PasswordServiceABC
 from pokeapi.domain.services.token import TokenService
@@ -20,5 +22,6 @@ class DomainServiceModule(Module):
             binder (Binder): The binder to configure.
 
         """
+        binder.bind(JWTServiceABC, to=JWTService, scope=singleton)  # type: ignore[type-abstract]
         binder.bind(PasswordServiceABC, to=PasswordService, scope=singleton)  # type: ignore[type-abstract]
         binder.bind(TokenServiceABC, to=TokenService, scope=singleton)  # type: ignore[type-abstract]

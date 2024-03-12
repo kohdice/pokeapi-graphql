@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from pokeapi.domain.entities.base import BaseEntity
+from pokeapi.domain.entities.pokemon import Pokemon
 
 
 class PokemonServiceABC(ABC):
@@ -12,24 +12,24 @@ class PokemonServiceABC(ABC):
     """
 
     @abstractmethod
-    def get_by_id(self, id_: int) -> BaseEntity | None:
+    def get_by_id(self, id_: int) -> Pokemon | None:
         """Retrieve a Pokémon by its identifier.
 
         Args:
             id_ (int): The identifier of the Pokémon to retrieve.
 
         Returns:
-            BaseEntity | None: The Pokémon with the specified identifier, or None if not found.
+            Pokemon | None: The Pokémon with the specified identifier, or None if not found.
 
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_all(self) -> list[BaseEntity]:
+    def get_all(self) -> list[Pokemon]:
         """Retrieve all Pokémon from the repository.
 
         Returns:
-            list[BaseEntity]: A list of all Pokémon in the repository.
+            list[Pokemon]: A list of all Pokémon in the repository.
 
         """
         pass  # pragma: no cover

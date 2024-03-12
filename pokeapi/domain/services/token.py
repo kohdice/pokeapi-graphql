@@ -1,98 +1,144 @@
 import datetime
-import logging
+import uuid
 
 from injector import inject, singleton
-from jose import JWTError, jwt
 
-from pokeapi.dependencies.settings.config import AppConfigABC
+from pokeapi.dependencies.settings.config_abc import AppConfigABC
+from pokeapi.domain.entities.token import Token
+from pokeapi.domain.entities.token_whitelist import TokenWhitelist
 from pokeapi.domain.entities.user import User
-from pokeapi.exceptions.token import TokenVerificationError
+from pokeapi.domain.repositories.token_whitelist import TokenWhitelistRepositoryABC
+from pokeapi.domain.services.jwt_abc import JWTServiceABC
 
 from .token_abc import TokenServiceABC
 
 
 @singleton
 class TokenService(TokenServiceABC):
-    """Token services.
+    """Concrete implementation of a token service.
 
-    token services to create and decode JWT tokens.
+    This class provides concrete implementations of the abstract methods defined in the
+    TokenServiceABC class. It is responsible for handling token creation and management.
+
+    Attributes:
+        _config (AppConfigABC): The application configuration.
+        _jwt_service (JWTServiceABC):
+            The service used to generate and verify tokens.
+        _whitelist_repo (TokenWhitelistRepositoryABC):
+            The repository used to manage token whitelists.
 
     """
 
     @inject
-    def __init__(self, config: AppConfigABC) -> None:
-        """Initialize the TokenServices class.
+    def __init__(
+        self,
+        config: AppConfigABC,
+        jwt_service: JWTServiceABC,
+        whitelist_repo: TokenWhitelistRepositoryABC,
+    ):
+        """Initialize the TokenService with services and repositories.
 
         Args:
             config (AppConfigABC): The application configuration.
+            jwt_service (JWTServiceABC):
+                The service used to generate and verify tokens.
+            whitelist_repo (TokenWhitelistRepositoryABC):
+                The repository used to manage token whitelists.
 
         """
         self._config = config
-        self._logger = logging.getLogger(__name__)
+        self._jwt_service = jwt_service
+        self._whitelist_repo = whitelist_repo
 
-    def create_token(self, entity: User, exp: datetime.datetime, jti: str) -> str:  # type: ignore
-        """Create a JWT token.
+    def create(self, entity: User) -> Token:
+        """Create a new token for a user.
+
+        This method creates a new token for the given user
+        and stores it in the token whitelist.
 
         Args:
-            entity (User): The user entity.
+            entity (User): The user for whom to create a token.
 
         Returns:
-            str: The JWT token.
+            Token: The created token.
 
         """
-        data = {
-            "iss": self._config.app_domain,
-            "sub": str(entity.id_),
-            "exp": exp.timestamp(),
-            "iat": datetime.datetime.utcnow().timestamp(),
-            "jti": jti,
-            "username": entity.username,
-        }
+        jti = str(uuid.uuid4())
+        exp = datetime.datetime.utcnow() + datetime.timedelta(
+            hours=self._config.access_token_lifetime
+        )
+        access_token = self._jwt_service.create_token(entity, exp, jti)
+        refresh_token = str(uuid.uuid4())
 
-        token = jwt.encode(
-            data, self._config.private_key, algorithm=self._config.jwt_algorithm
+        self._whitelist_repo.create(
+            entity=TokenWhitelist(
+                user_id=entity.id_,
+                access_token=jti,
+                refresh_token=refresh_token,
+                created_by=entity.username,
+                created_at=datetime.datetime.now(),
+                updated_by=entity.username,
+                updated_at=datetime.datetime.now(),
+            ),
         )
 
-        # NOTE: The token is a string, but the type hint is not recognized.
-        assert isinstance(token, str)
+        return Token(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="Bearer",
+        )
 
-        return token
+    def update(self, entity: User, whitelist_id: int) -> Token:
+        """Update a token for a user.
 
-    def decode_token(self, token: str) -> dict:
-        """Decode a JWT token.
+        This method updates the token for the given user
+        and stores it in the token whitelist.
 
         Args:
-            token (str): The JWT token to be decoded.
+            entity (User): The user for whom to update the token.
+            whitelist_id (int): The ID of the token whitelist entry.
 
         Returns:
-            dict: The decoded payload.
-
-        Raises:
-            TokenVerificationError: If the token is invalid.
+            Token: The updated token.
 
         """
-        try:
-            payload = jwt.decode(
-                token,
-                self._config.public_key,
-                algorithms=self._config.jwt_algorithm,
-                issuer=self._config.app_domain,
-            )
-        except JWTError as e:
-            self._logger.error(
-                TokenVerificationError(f"Token verification failed: {e}")
-            )
-            raise TokenVerificationError("Token verification failed.") from None
+        jti = str(uuid.uuid4())
+        exp = datetime.datetime.utcnow() + datetime.timedelta(
+            hours=self._config.access_token_lifetime
+        )
+        access_token = self._jwt_service.create_token(entity, exp, jti)
+        refresh_token = str(uuid.uuid4())
 
-        # NOTE: The payload is a dict, but the type hint is not recognized.
-        assert isinstance(payload, dict)
+        self._whitelist_repo.create(
+            entity=TokenWhitelist(
+                id_=whitelist_id,
+                user_id=entity.id_,
+                access_token=jti,
+                refresh_token=refresh_token,
+                created_by=entity.username,
+                created_at=datetime.datetime.now(),
+                updated_by=entity.username,
+                updated_at=datetime.datetime.now(),
+            ),
+        )
 
-        if "jti" not in payload:
-            self._logger.error(
-                TokenVerificationError(
-                    "Token verification failed: The token is invalid as it lacks the 'jti' claim."
-                )
-            )
-            raise TokenVerificationError("Token verification failed.")
+        return Token(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="Bearer",
+        )
 
-        return payload
+    def delete(self, entity: User) -> None:
+        """Delete a token for a user.
+
+        This method deletes the token for the given user
+        from the token whitelist.
+
+        Args:
+            entity (User): The user for whom to delete the token.
+
+        """
+        token_exp = datetime.datetime.now() - datetime.timedelta(
+            hours=self._config.refresh_token_lifetime
+        )
+        self._whitelist_repo.delete(entity.id_, token_exp)

@@ -1,6 +1,6 @@
 from injector import inject, singleton
 
-from pokeapi.domain.entities.base import BaseEntity
+from pokeapi.domain.entities.pokemon import Pokemon
 from pokeapi.domain.repositories.pokemon import PokemonRepositoryABC
 
 from .pokemon_abc import PokemonServiceABC
@@ -28,23 +28,23 @@ class PokemonService(PokemonServiceABC):
         """
         self._repo = repo
 
-    def get_by_id(self, id_: int) -> BaseEntity | None:
+    def get_by_id(self, id_: int) -> Pokemon | None:
         """Retrieve a pokemon by its identifier.
 
         Args:
             id_ (int): The identifier of the Pokémon to retrieve.
 
         Returns:
-            BaseEntity | None: The Pokémon with the given identifier, or None if it does not exist.
+            Pokemon | None: The Pokémon with the given identifier, or None if it does not exist.
 
         """
         return self._repo.get_by_id(id_)
 
-    def get_all(self) -> list[BaseEntity]:
+    def get_all(self) -> list[Pokemon]:
         """Retrieve all Pokémon from the repository.
 
         Returns:
-            list[BaseEntity]: A list of all Pokémon in the repository.
+            list[Pokemon]: A list of all Pokémon in the repository.
 
         """
         return self._repo.get_all()

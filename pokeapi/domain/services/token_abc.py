@@ -1,40 +1,49 @@
-import datetime
 from abc import ABC, abstractmethod
 
-from pokeapi.domain.entities.base import BaseEntity
+from pokeapi.domain.entities.token import Token
+from pokeapi.domain.entities.user import User
 
 
 class TokenServiceABC(ABC):
-    """Abstract class for Token services.
+    """Abstract class for token creation and management.
 
-    This class is used to define the methods that will be used to create and decode JWT tokens.
+    This class is an abstract class that defines the methods that a token
+    creation and management service should implement.
 
     """
 
     @abstractmethod
-    def create_token(self, entity: BaseEntity, exp: datetime.datetime, jti: str) -> str:
-        """Create a JWT token.
+    def create(self, entity: User) -> Token:
+        """Create a token for the given entity.
 
         Args:
-            entity (BaseEntity): The entity to be used as the payload.
-            exp (datetime.datetime): The expiration date of the token.
-            jti (str): The JWT ID.
+            entity (User): The entity to be used as the payload.
 
         Returns:
-            str: The JWT token.
+            Token: The token issued to the entity.
+        """
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def update(self, entity: User, whitelist_id: int) -> Token:
+        """Update a token for the given entity.
+
+        Args:
+            entity (User): The entity to be used as the payload.
+            whitelist_id (int): The ID of the token to be updated.
+
+        Returns:
+            Token: The token issued to the entity.
 
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def decode_token(self, token: str) -> dict:
-        """Decode a JWT token.
+    def delete(self, entity: User) -> None:
+        """Delete a token for the given entity.
 
         Args:
-            token (str): The JWT token to be decoded.
-
-        Returns:
-            dict: The decoded payload.
+            entity (User): The entity to be used as the payload.
 
         """
         pass  # pragma: no cover

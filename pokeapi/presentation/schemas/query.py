@@ -18,6 +18,8 @@ class Query:
 
     Attributes:
         pokemon (Pokemon): Returns a Pokémon resource by ID.
+        pokemon_type (PokemonType): Returns a Pokémon Type resource by ID.
+        pokemon_ability (PokemonAbility): Returns a Pokémon Ability resource by ID.
 
     """
 

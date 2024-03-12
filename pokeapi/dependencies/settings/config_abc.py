@@ -8,16 +8,6 @@ class AppConfigABC(ABC):
     This class defines the interface for application configuration.
     It is used to define the configuration settings for the application.
 
-    Attributes:
-        stage: The stage of the application (e.g. 'development', 'staging', 'production').
-        debug: A boolean indicating whether the application is in debug mode.
-        database_url: The URL for the database connection.
-        private_key: The private key for the application.
-        public_key: The public key for the application.
-        jwt_algorithm: The algorithm to use for JWT signing.
-        access_token_lifetime: The lifetime of access tokens (in hours).
-        refresh_token_lifetime: The lifetime of refresh tokens (in hours).
-
     """
 
     @staticmethod

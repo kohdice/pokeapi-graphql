@@ -1,6 +1,5 @@
 import datetime
 import logging
-import uuid
 
 from injector import inject, singleton
 
@@ -30,9 +29,9 @@ class AuthenticationService(AuthenticationServiceABC):
         _config (AppConfigABC): The application configuration.
         _password_service (PasswordServiceABC): The service used to hash and verify passwords.
         _token_service (TokenServiceABC): The service used to generate and verify tokens.
-        _user_repo (UserRepositoryABC): The repository used to retrieve user data.
         _token_whitelist_repo (TokenWhitelistRepositoryABC):
             The repository used to manage token whitelists.
+        _user_repo (UserRepositoryABC): The repository used to retrieve user data.
 
     """
 
@@ -51,9 +50,9 @@ class AuthenticationService(AuthenticationServiceABC):
             config (AppConfigABC): The application configuration.
             password_service (PasswordServiceABC): The service used to hash and verify passwords.
             token_service (TokenServiceABC): The service used to generate and verify tokens.
-            user_repo (UserRepositoryABC): The repository used to retrieve user data.
             token_whitelist_repo (TokenWhitelistRepositoryABC):
                 The repository used to manage token whitelists.
+            user_repo (UserRepositoryABC): The repository used to retrieve user data.
 
         """
         self._logger = logging.getLogger(__name__)
@@ -95,36 +94,13 @@ class AuthenticationService(AuthenticationServiceABC):
             )
             raise AuthenticationError("Password is incorrect.")
 
-        jti = str(uuid.uuid4())
-        exp = datetime.datetime.utcnow() + datetime.timedelta(
-            hours=self._config.access_token_lifetime
-        )
-        access_token = self._token_service.create_token(user, exp, jti)
-        refresh_token = str(uuid.uuid4())
-
-        self._token_whitelist_repo.create(
-            entity=TokenWhitelist(
-                id_=None,
-                user_id=user.id_,
-                access_token=jti,
-                refresh_token=refresh_token,
-                created_by=user.username,
-                created_at=datetime.datetime.now(),
-                updated_by=user.username,
-                updated_at=datetime.datetime.now(),
-            ),
-        )
-
-        token_exp = datetime.datetime.now() - datetime.timedelta(
+        # NOTE: Delete expired tokens.
+        exp = datetime.datetime.now() - datetime.timedelta(
             hours=self._config.refresh_token_lifetime
         )
-        self._token_whitelist_repo.delete(user.id_, token_exp)
+        self._token_whitelist_repo.delete(user.id_, exp)
 
-        return Token(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            token_type="Bearer",
-        )
+        return self._token_service.create(user)
 
     def refresh(self, token: str) -> Token:
         """Refresh a user's token.
@@ -167,36 +143,13 @@ class AuthenticationService(AuthenticationServiceABC):
             )
             raise UserNotFoundError("User not found.")
 
-        jti = str(uuid.uuid4())
-        exp = datetime.datetime.utcnow() + datetime.timedelta(
-            hours=self._config.access_token_lifetime
-        )
-        access_token = self._token_service.create_token(user, exp, jti)
-        refresh_token = str(uuid.uuid4())
-
-        self._token_whitelist_repo.create(
-            entity=TokenWhitelist(
-                id_=None,
-                user_id=user.id_,
-                access_token=jti,
-                refresh_token=refresh_token,
-                created_by=user.username,
-                created_at=datetime.datetime.now(),
-                updated_by=user.username,
-                updated_at=datetime.datetime.now(),
-            ),
-        )
-
-        token_exp = datetime.datetime.now() - datetime.timedelta(
+        # NOTE: Delete expired tokens.
+        exp = datetime.datetime.now() - datetime.timedelta(
             hours=self._config.refresh_token_lifetime
         )
-        self._token_whitelist_repo.delete(user.id_, token_exp)
+        self._token_whitelist_repo.delete(user.id_, exp)
 
-        return Token(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            token_type="Bearer",
-        )
+        return self._token_service.update(user, valid_token.id_)
 
     def create_user(self, username: str, password: str) -> Token:
         """Create a new user and return a token.
@@ -216,28 +169,4 @@ class AuthenticationService(AuthenticationServiceABC):
 
         created_user = self._user_repo.create(user)
 
-        jti = str(uuid.uuid4())
-        exp = datetime.datetime.utcnow() + datetime.timedelta(
-            hours=self._config.access_token_lifetime
-        )
-        access_token = self._token_service.create_token(created_user, exp, jti)
-        refresh_token = str(uuid.uuid4())
-
-        self._token_whitelist_repo.create(
-            entity=TokenWhitelist(
-                id_=None,
-                user_id=created_user.id_,
-                access_token=jti,
-                refresh_token=refresh_token,
-                created_by=user.username,
-                created_at=datetime.datetime.now(),
-                updated_by=user.username,
-                updated_at=datetime.datetime.now(),
-            ),
-        )
-
-        return Token(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            token_type="Bearer",
-        )
+        return self._token_service.create(created_user)

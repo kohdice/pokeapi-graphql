@@ -2,7 +2,7 @@ import datetime
 import logging
 
 from injector import inject, singleton
-from sqlalchemy import and_, select, update
+from sqlalchemy import and_, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -39,7 +39,7 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
         self._db = db
         self._logger = logging.getLogger(__name__)
 
-    def _convert_to_entity(self, model: TokenWhitelistModel) -> TokenWhitelistEntity:  # type: ignore
+    def _convert_to_entity(self, model: TokenWhitelistModel) -> TokenWhitelistEntity:
         """Converts a SQLAlchemy model to a domain entity.
 
         Args:
@@ -60,7 +60,7 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
             updated_at=model.updated_at,
         )
 
-    def get_by_access_token(  # type: ignore
+    def get_by_access_token(
         self, entity: TokenWhitelistEntity, expiration: datetime.datetime
     ) -> TokenWhitelistEntity | None:
         """Retrieve an entity by its access token.
@@ -90,7 +90,7 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
 
         return self._convert_to_entity(result)
 
-    def get_by_refresh_token(  # type: ignore
+    def get_by_refresh_token(
         self, entity: TokenWhitelistEntity, expiration: datetime.datetime
     ) -> TokenWhitelistEntity | None:
         """Retrieve an entity by its refresh token.
@@ -120,17 +120,20 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
 
         return self._convert_to_entity(result)
 
-    def create(self, entity: TokenWhitelistEntity) -> None:  # type: ignore
+    def create(self, entity: TokenWhitelistEntity) -> TokenWhitelistEntity:
         """Create a new entity.
 
         Args:
             entity (TokenWhitelistEntity): The entity to be created.
 
+        Returns:
+            TokenWhitelistEntity: The created entity.
+
         Raises:
             TokenRegistrationError: If the entity could not be created.
 
         """
-        statement = TokenWhitelistModel(
+        statement = insert(TokenWhitelistModel).values(
             user_id=entity.user_id,
             access_token=entity.access_token,
             refresh_token=entity.refresh_token,
@@ -139,19 +142,33 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
             updated_by=entity.updated_by,
             updated_at=entity.updated_at,
         )
+
         try:
-            self._db.add(statement)
+            result = self._db.execute(statement)
             self._db.commit()
         except IntegrityError as e:
             self._db.rollback()
             self._logger.error(f"Failed to register token in the whitelist : {e}")
             raise TokenRegistrationError("Failed to register token") from None
 
-    def update(self, entity: TokenWhitelistEntity) -> None:  # type: ignore
+        if result.inserted_primary_key is None:
+            raise TokenRegistrationError("Failed to register token")
+
+        read_statement = select(TokenWhitelistModel).where(
+            TokenWhitelistModel.id_ == result.inserted_primary_key[0]
+        )
+        created_token_whitelist = self._db.execute(read_statement).scalar_one()
+
+        return self._convert_to_entity(created_token_whitelist)
+
+    def update(self, entity: TokenWhitelistEntity) -> TokenWhitelistEntity:
         """Update an existing entity.
 
         Args:
             entity (TokenWhitelistEntity): The entity to be updated.
+
+        Returns:
+            TokenWhitelistEntity: The updated entity.
 
         Raises:
             TokenUpdateError: If the entity could not be updated.
@@ -159,7 +176,7 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
         """
         statement = (
             update(TokenWhitelistModel)
-            .where(TokenWhitelistModel.user_id == entity.user_id)
+            .where(TokenWhitelistModel.id_ == entity.id_)
             .values(
                 access_token=entity.access_token,
                 refresh_token=entity.refresh_token,
@@ -167,18 +184,31 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
                 updated_at=entity.updated_at,
             )
         )
-        result = self._db.execute(statement)
+
+        try:
+            result = self._db.execute(statement)
+            self._db.commit()
+        except IntegrityError as e:
+            self._db.rollback()
+            self._logger.error(e)
+            raise TokenUpdateError("Failed to update token") from None
 
         if result.rowcount == 0:
-            self._db.rollback()
             self._logger.error(
-                f"Faild to update token. ID: {entity.id_}, User: {entity.user_id}"
+                TokenUpdateError(
+                    f"Faild to update token. ID: {entity.id_}, User: {entity.user_id}"
+                )
             )
             raise TokenUpdateError("Failed to update token") from None
 
-        self._db.commit()
+        read_statement = select(TokenWhitelistModel).where(
+            TokenWhitelistModel.id_ == entity.id_
+        )
+        updated_token_whitelist = self._db.execute(read_statement).scalar_one()
 
-    def delete(self, user_id: int, expiration: datetime.datetime) -> None:  # type: ignore
+        return self._convert_to_entity(updated_token_whitelist)
+
+    def delete(self, user_id: int, expiration: datetime.datetime) -> None:
         """Delete expired tokens for a user.
 
         Args:
