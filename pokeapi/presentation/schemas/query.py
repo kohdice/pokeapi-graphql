@@ -10,7 +10,7 @@ from pokeapi.presentation.schemas.pokemon_ability import PokemonAbility
 from pokeapi.presentation.schemas.pokemon_type import PokemonType
 
 
-@strawberry.type
+@strawberry.type(description="Root query schema.")
 class Query:
     """Root query schema.
 

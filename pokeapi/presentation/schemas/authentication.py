@@ -1,7 +1,7 @@
 import strawberry
 
 
-@strawberry.type
+@strawberry.type(description="A schema representing an authentication result.")
 class AuthResult:
     """A class representing an authentication result.
 
@@ -15,12 +15,12 @@ class AuthResult:
 
     """
 
-    access_token: str
-    refresh_token: str
-    token_type: str
+    access_token: str = strawberry.field(description="The access token.")
+    refresh_token: str = strawberry.field(description="The refresh token.")
+    token_type: str = strawberry.field(description="The token type.")
 
 
-@strawberry.type
+@strawberry.type(description="A schema representing an authentication error.")
 class AuthErrors:
     """A class representing an authentication error.
 
@@ -32,4 +32,4 @@ class AuthErrors:
 
     """
 
-    message: str
+    message: str = strawberry.field(description="The error message.")

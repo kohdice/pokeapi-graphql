@@ -9,7 +9,7 @@ from pokeapi.domain.entities.pokemon_ability import (
 from pokeapi.exceptions.pokemon_ability import AbilityNotFoundError
 
 
-@strawberry.type
+@strawberry.type(description="A schema representing a Pokémon Ability.")
 class PokemonAbility(relay.Node):
     """GraphQL schema for Pokémon Ability.
 

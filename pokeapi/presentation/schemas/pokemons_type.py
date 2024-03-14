@@ -3,7 +3,7 @@ import strawberry
 from pokeapi.presentation.schemas.pokemon_type import PokemonType
 
 
-@strawberry.type
+@strawberry.type(description="A schema representing a Pokémon's Type.")
 class PokemonsType:
     """GraphQL schema for Pokémon's Type.
 
