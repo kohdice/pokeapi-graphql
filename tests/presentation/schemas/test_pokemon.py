@@ -9,9 +9,7 @@ from pokeapi.presentation.schemas.pokemon_ability import PokemonAbility
 from pokeapi.presentation.schemas.pokemon_type import PokemonType
 from pokeapi.presentation.schemas.pokemons_ability import PokemonsAbility
 from pokeapi.presentation.schemas.pokemons_type import PokemonsType
-from tests.conftest import TEST_POKEMON_ENTITY
-
-from .conftest import MockInfo
+from tests.conftest import TEST_POKEMON_ENTITY, MockInfo
 
 TEST_SCHEMA = Pokemon(
     id=1,

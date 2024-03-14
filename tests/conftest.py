@@ -1,9 +1,11 @@
 import datetime
+from dataclasses import dataclass
 from unittest.mock import MagicMock
 
 import pytest
 from injector import Binder, Injector, singleton
 from sqlalchemy.orm import Session
+from starlette.responses import Response
 
 from pokeapi.application.services.authentication import AuthenticationService
 from pokeapi.application.services.authentication_abc import AuthenticationServiceABC
@@ -45,6 +47,7 @@ from pokeapi.infrastructure.database.repositories.token_whitelist import (
     TokenWhitelistRepository,
 )
 from pokeapi.infrastructure.database.repositories.user import UserRepository
+from pokeapi.presentation.schemas.user import UserInput
 
 EXECUTION_DATETIME = datetime.datetime(2000, 1, 1, 0, 10, 0)
 ISSUE_DATETIME = datetime.datetime(2000, 1, 1, 0, 0, 0)
@@ -112,6 +115,16 @@ TEST_TOKEN_WHITELIST_ENTITY = TokenWhitelist(
     updated_by="Red",
     updated_at=ISSUE_DATETIME,
 )
+TEST_USER_INPUT = UserInput(username="Red", password="password")
+
+
+class MockRequest:
+    pass
+
+
+@dataclass
+class MockInfo:
+    context: dict
 
 
 @pytest.fixture(scope="session")
@@ -187,3 +200,14 @@ def container() -> Injector:
         )
 
     return Injector(configure)
+
+
+@pytest.fixture(scope="module")
+def mock_info(container: Injector) -> MockInfo:
+    return MockInfo(
+        context={
+            "container": container,
+            "request": MockRequest(),
+            "response": Response(),
+        }
+    )

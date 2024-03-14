@@ -5,9 +5,7 @@ import pytest
 from pokeapi.application.services.pokemon_type import TypeService
 from pokeapi.exceptions.pokemon_type import TypeNotFoundError
 from pokeapi.presentation.schemas.pokemon_type import PokemonType
-from tests.conftest import TEST_POKEMON_TYPE_ENTITY
-
-from .conftest import MockInfo
+from tests.conftest import TEST_POKEMON_TYPE_ENTITY, MockInfo
 
 TEST_SCHEMA = PokemonType(id=1, type_name="ノーマル")
 
