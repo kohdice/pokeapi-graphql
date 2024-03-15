@@ -61,12 +61,12 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
         )
 
     def get_by_access_token(
-        self, entity: TokenWhitelistEntity, expiration: datetime.datetime
+        self, token: str, expiration: datetime.datetime
     ) -> TokenWhitelistEntity | None:
         """Retrieve an entity by its access token.
 
         Args:
-            entity (TokenWhitelistEntity): The entity with the access token to retrieve.
+            token (str): The access token to retrieve.
             expiration (datetime.datetime): The expiration date of the access token.
 
         Returns:
@@ -75,8 +75,7 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
         """
         statement = select(TokenWhitelistModel).where(
             and_(
-                TokenWhitelistModel.user_id == entity.user_id,
-                TokenWhitelistModel.access_token == entity.access_token,
+                TokenWhitelistModel.access_token == token,
                 TokenWhitelistModel.updated_at.between(
                     expiration, datetime.datetime.now()
                 ),
@@ -91,12 +90,12 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
         return self._convert_to_entity(result)
 
     def get_by_refresh_token(
-        self, entity: TokenWhitelistEntity, expiration: datetime.datetime
+        self, token: str, expiration: datetime.datetime
     ) -> TokenWhitelistEntity | None:
         """Retrieve an entity by its refresh token.
 
         Args:
-            entity (TokenWhitelistEntity): The entity with the refresh token to retrieve.
+            token (str): The refresh token to retrieve.
             expiration (datetime.datetime): The expiration date of the refresh token.
 
         Returns:
@@ -105,8 +104,7 @@ class TokenWhitelistRepository(TokenWhitelistRepositoryABC):
         """
         statement = select(TokenWhitelistModel).where(
             and_(
-                TokenWhitelistModel.user_id == entity.user_id,
-                TokenWhitelistModel.refresh_token == entity.refresh_token,
+                TokenWhitelistModel.refresh_token == token,
                 TokenWhitelistModel.updated_at.between(
                     expiration, datetime.datetime.now()
                 ),

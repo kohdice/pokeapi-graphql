@@ -34,7 +34,7 @@ class TokenWhitelistRepositoryABC(ABC):
 
     @abstractmethod
     def get_by_access_token(
-        self, entity: TokenWhitelistEntity, expiration: datetime.datetime
+        self, token: str, expiration: datetime.datetime
     ) -> TokenWhitelistEntity | None:
         """Retrieve an entity by its access token.
 
@@ -50,7 +50,7 @@ class TokenWhitelistRepositoryABC(ABC):
 
     @abstractmethod
     def get_by_refresh_token(
-        self, entity: TokenWhitelistEntity, expiration: datetime.datetime
+        self, token: str, expiration: datetime.datetime
     ) -> TokenWhitelistEntity | None:
         """Retrieve an entity by its refresh token.
 

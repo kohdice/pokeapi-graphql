@@ -121,18 +121,7 @@ class TestTokenWhitelistRepository:
         self, repo: TokenWhitelistRepository, setup_for_user: int
     ) -> None:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
-        actual = repo.get_by_access_token(
-            TokenWhitelistEntity(
-                user_id=setup_for_user,
-                access_token="foo",
-                refresh_token=None,
-                created_by="test_repository",
-                created_at=None,
-                updated_by="test_repository",
-                updated_at=None,
-            ),
-            expiration,
-        )
+        actual = repo.get_by_access_token("foo", expiration)
 
         assert isinstance(actual, TokenWhitelistEntity)
         assert actual.user_id == setup_for_user
@@ -142,18 +131,7 @@ class TestTokenWhitelistRepository:
         self, repo: TokenWhitelistRepository
     ) -> None:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
-        actual = repo.get_by_access_token(
-            TokenWhitelistEntity(
-                user_id=0,
-                access_token="foo",
-                refresh_token=None,
-                created_by="test_repository",
-                created_at=None,
-                updated_by="test_repository",
-                updated_at=None,
-            ),
-            expiration,
-        )
+        actual = repo.get_by_access_token("hoge", expiration)
 
         assert actual is None
 
@@ -163,18 +141,7 @@ class TestTokenWhitelistRepository:
         self, repo: TokenWhitelistRepository, setup_for_user: int
     ) -> None:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
-        actual = repo.get_by_refresh_token(
-            TokenWhitelistEntity(
-                user_id=setup_for_user,
-                access_token=None,
-                refresh_token="bar",
-                created_by="test_repository",
-                created_at=None,
-                updated_by="test_repository",
-                updated_at=None,
-            ),
-            expiration,
-        )
+        actual = repo.get_by_refresh_token("bar", expiration)
 
         assert isinstance(actual, TokenWhitelistEntity)
         assert actual.user_id == setup_for_user
@@ -184,18 +151,7 @@ class TestTokenWhitelistRepository:
         self, repo: TokenWhitelistRepository
     ) -> None:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
-        actual = repo.get_by_refresh_token(
-            TokenWhitelistEntity(
-                user_id=0,
-                access_token=None,
-                refresh_token="bar",
-                created_by="test_repository",
-                created_at=None,
-                updated_by="test_repository",
-                updated_at=None,
-            ),
-            expiration,
-        )
+        actual = repo.get_by_refresh_token("bar", expiration)
 
         assert actual is None
 
