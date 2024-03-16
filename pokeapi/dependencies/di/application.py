@@ -31,4 +31,4 @@ class ApplicationServiceModule(Module):
         binder.bind(AbilityServiceABC, to=AbilityService, scope=singleton)  # type: ignore[type-abstract]
         binder.bind(PokemonServiceABC, to=PokemonService, scope=singleton)  # type: ignore[type-abstract]
         binder.bind(TypeServiceABC, to=TypeService, scope=singleton)  # type: ignore[type-abstract]
-        binder.bind(UserServiceABC, to=UserService, scope=singleton)  # type: ignore[type-abstract].bind
+        binder.bind(UserServiceABC, to=UserService, scope=singleton)  # type: ignore[type-abstract]
