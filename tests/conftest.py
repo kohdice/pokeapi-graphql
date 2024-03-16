@@ -1,5 +1,5 @@
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from unittest.mock import MagicMock
 
 import pytest
@@ -51,6 +51,9 @@ from pokeapi.presentation.schemas.user import UserInput
 
 EXECUTION_DATETIME = datetime.datetime(2000, 1, 1, 0, 10, 0)
 ISSUE_DATETIME = datetime.datetime(2000, 1, 1, 0, 0, 0)
+TEST_UUID = "00000000-0000-0000-0000-000000000000"
+
+
 TEST_POKEMON_ENTITY = Pokemon(
     id_=1,
     national_pokedex_number=1,
@@ -118,8 +121,9 @@ TEST_TOKEN_WHITELIST_ENTITY = TokenWhitelist(
 TEST_USER_INPUT = UserInput(username="Red", password="password")
 
 
+@dataclass
 class MockRequest:
-    pass
+    headers: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -202,7 +206,7 @@ def container() -> Injector:
     return Injector(configure)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def mock_info(container: Injector) -> MockInfo:
     return MockInfo(
         context={
@@ -211,3 +215,23 @@ def mock_info(container: Injector) -> MockInfo:
             "response": Response(),
         }
     )
+
+
+@pytest.fixture(scope="session")
+def mock_refresh_info(container: Injector) -> MockInfo:
+    return MockInfo(
+        context={
+            "container": container,
+            "request": MockRequest(
+                headers={"Authorization": f"Bearer {TEST_UUID}"},
+            ),
+            "response": Response(),
+        }
+    )
+
+
+@pytest.fixture(scope="session")
+def mock_context(container: Injector) -> dict:
+    return {
+        "container": container,
+    }

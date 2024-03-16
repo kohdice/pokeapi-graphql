@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from pokeapi.application.services.authentication import AuthenticationService
 from pokeapi.exceptions.authentication import AuthenticationError
 from pokeapi.exceptions.user import UserCreationError
-from pokeapi.presentation.resolvers.authentication import auth, refresh, user_create
+from pokeapi.presentation.resolvers.authentication import auth, create_user, refresh
 from pokeapi.presentation.schemas.authentication import AuthErrors, AuthResult
 from tests.conftest import TEST_TOKEN_ENTITY, TEST_USER_INPUT, MockInfo
 
@@ -29,31 +29,37 @@ class TestAuthResolver:
         assert isinstance(actual, AuthErrors)
         assert actual.message == "error"
 
-    def test_refresh(self, mock_info: MockInfo) -> None:
-        container = mock_info.context["container"]
+    def test_refresh(self, mock_refresh_info: MockInfo) -> None:
+        container = mock_refresh_info.context["container"]
         service = container.get(AuthenticationService)
         service.refresh = MagicMock(return_value=TEST_TOKEN_ENTITY)
-        actual = refresh("refresh", mock_info)  # type: ignore
+        actual = refresh(mock_refresh_info)  # type: ignore
 
         assert isinstance(actual, AuthResult)
         assert actual.access_token == "access_token"
         assert actual.refresh_token == "refresh_token"
         assert actual.token_type == "Bearer"
 
-    def test_refresh_auth_error(self, mock_info: MockInfo) -> None:
-        container = mock_info.context["container"]
+    def test_refresh_auth_header_error(self, mock_info: MockInfo) -> None:
+        actual = refresh(mock_info)  # type: ignore
+
+        assert isinstance(actual, AuthErrors)
+        assert actual.message == "User is unauthorized."
+
+    def test_refresh_auth_error(self, mock_refresh_info: MockInfo) -> None:
+        container = mock_refresh_info.context["container"]
         service = container.get(AuthenticationService)
         service.refresh = MagicMock(side_effect=AuthenticationError("error"))
-        actual = refresh("refresh", mock_info)  # type: ignore
+        actual = refresh(mock_refresh_info)  # type: ignore
 
         assert isinstance(actual, AuthErrors)
         assert actual.message == "error"
 
-    def test_refresh_user_not_found_error(self, mock_info: MockInfo) -> None:
-        container = mock_info.context["container"]
+    def test_refresh_user_not_found_error(self, mock_refresh_info: MockInfo) -> None:
+        container = mock_refresh_info.context["container"]
         service = container.get(AuthenticationService)
         service.refresh = MagicMock(side_effect=AuthenticationError("error"))
-        actual = refresh("refresh", mock_info)  # type: ignore
+        actual = refresh(mock_refresh_info)  # type: ignore
 
         assert isinstance(actual, AuthErrors)
         assert actual.message == "error"
@@ -62,7 +68,7 @@ class TestAuthResolver:
         container = mock_info.context["container"]
         service = container.get(AuthenticationService)
         service.create_user = MagicMock(return_value=TEST_TOKEN_ENTITY)
-        actual = user_create(TEST_USER_INPUT, mock_info)  # type: ignore
+        actual = create_user(TEST_USER_INPUT, mock_info)  # type: ignore
 
         assert isinstance(actual, AuthResult)
         assert actual.access_token == "access_token"
@@ -73,7 +79,7 @@ class TestAuthResolver:
         container = mock_info.context["container"]
         service = container.get(AuthenticationService)
         service.create_user = MagicMock(side_effect=UserCreationError("error"))
-        actual = user_create(TEST_USER_INPUT, mock_info)  # type: ignore
+        actual = create_user(TEST_USER_INPUT, mock_info)  # type: ignore
 
         assert isinstance(actual, AuthErrors)
         assert actual.message == "error"
