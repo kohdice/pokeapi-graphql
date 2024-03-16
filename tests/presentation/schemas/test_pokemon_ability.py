@@ -5,9 +5,7 @@ import pytest
 from pokeapi.application.services.pokemon_ability import AbilityService
 from pokeapi.exceptions.pokemon_ability import AbilityNotFoundError
 from pokeapi.presentation.schemas.pokemon_ability import PokemonAbility
-from tests.conftest import TEST_POKEMON_ABILITY_ENTITY
-
-from .conftest import MockInfo
+from tests.conftest import TEST_POKEMON_ABILITY_ENTITY, MockInfo
 
 TEST_SCHEMA = PokemonAbility(id=1, ability_name="あくしゅう")
 

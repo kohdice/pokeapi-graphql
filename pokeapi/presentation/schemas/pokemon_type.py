@@ -7,7 +7,7 @@ from pokeapi.domain.entities.pokemon_type import PokemonType as PokemonTypeEntit
 from pokeapi.exceptions.pokemon_type import TypeNotFoundError
 
 
-@strawberry.type
+@strawberry.type(description="A schema representing a Pokémon Type.")
 class PokemonType(relay.Node):
     """GraphQL schema for Pokémon Type.
 

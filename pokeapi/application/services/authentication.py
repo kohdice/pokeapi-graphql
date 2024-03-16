@@ -124,7 +124,7 @@ class AuthenticationService(AuthenticationServiceABC):
             hours=self._config.refresh_token_lifetime
         )
         valid_token: TokenWhitelist | None = (
-            self._token_whitelist_repo.get_by_refresh_token(token, exp)  # type: ignore
+            self._token_whitelist_repo.get_by_refresh_token(token, exp)
         )
 
         if valid_token is None:

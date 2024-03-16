@@ -1,9 +1,13 @@
 import datetime
+from dataclasses import dataclass, field
 from unittest.mock import MagicMock
 
 import pytest
+from freezegun import freeze_time
 from injector import Binder, Injector, singleton
+from jose import jwt
 from sqlalchemy.orm import Session
+from starlette.responses import Response
 
 from pokeapi.application.services.authentication import AuthenticationService
 from pokeapi.application.services.authentication_abc import AuthenticationServiceABC
@@ -45,9 +49,13 @@ from pokeapi.infrastructure.database.repositories.token_whitelist import (
     TokenWhitelistRepository,
 )
 from pokeapi.infrastructure.database.repositories.user import UserRepository
+from pokeapi.presentation.schemas.user import UserInput
 
 EXECUTION_DATETIME = datetime.datetime(2000, 1, 1, 0, 10, 0)
 ISSUE_DATETIME = datetime.datetime(2000, 1, 1, 0, 0, 0)
+TEST_UUID = "00000000-0000-0000-0000-000000000000"
+
+
 TEST_POKEMON_ENTITY = Pokemon(
     id_=1,
     national_pokedex_number=1,
@@ -112,6 +120,17 @@ TEST_TOKEN_WHITELIST_ENTITY = TokenWhitelist(
     updated_by="Red",
     updated_at=ISSUE_DATETIME,
 )
+TEST_USER_INPUT = UserInput(username="Red", password="password")
+
+
+@dataclass
+class MockRequest:
+    headers: dict = field(default_factory=dict)
+
+
+@dataclass
+class MockInfo:
+    context: dict
 
 
 @pytest.fixture(scope="session")
@@ -187,3 +206,76 @@ def container() -> Injector:
         )
 
     return Injector(configure)
+
+
+@pytest.fixture(scope="session")
+@freeze_time(ISSUE_DATETIME)
+def access_token(container: Injector) -> str:
+    config = container.get(AppConfig)
+    expiration = datetime.datetime.utcnow() + datetime.timedelta(
+        hours=config.access_token_lifetime
+    )
+    data = {
+        "iss": config.app_domain,
+        "sub": "1",
+        "exp": expiration.timestamp(),
+        "iat": datetime.datetime.utcnow().timestamp(),
+        "jti": TEST_UUID,
+        "username": "Red",
+    }
+
+    token = jwt.encode(data, config.private_key, algorithm=config.jwt_algorithm)
+    assert isinstance(token, str)
+
+    return token
+
+
+@pytest.fixture(scope="session")
+@freeze_time(EXECUTION_DATETIME)
+def refreshed_access_token(container: Injector) -> str:
+    config = container.get(AppConfig)
+    expiration = datetime.datetime.utcnow() + datetime.timedelta(
+        hours=config.access_token_lifetime
+    )
+    data = {
+        "iss": config.app_domain,
+        "sub": "1",
+        "exp": expiration.timestamp(),
+        "iat": datetime.datetime.utcnow().timestamp(),
+        "jti": TEST_UUID,
+        "username": "Red",
+    }
+
+    token = jwt.encode(data, config.private_key, algorithm=config.jwt_algorithm)
+    assert isinstance(token, str)
+
+    return token
+
+
+@pytest.fixture(scope="session")
+def mock_refresh_request() -> MockRequest:
+    return MockRequest(headers={"Authorization": f"Bearer {TEST_UUID}"})
+
+
+@pytest.fixture(scope="session")
+def mock_info(container: Injector) -> MockInfo:
+    return MockInfo(
+        context={
+            "container": container,
+            "request": MockRequest(),
+            "response": Response(),
+        }
+    )
+
+
+@pytest.fixture(scope="session")
+def mock_refresh_info(
+    container: Injector, mock_refresh_request: MockRequest
+) -> MockInfo:
+    return MockInfo(
+        context={
+            "container": container,
+            "request": mock_refresh_request,
+            "response": Response(),
+        }
+    )

@@ -11,7 +11,7 @@ from pokeapi.presentation.schemas.pokemons_ability import PokemonsAbility
 from pokeapi.presentation.schemas.pokemons_type import PokemonsType
 
 
-@strawberry.type
+@strawberry.type(description="A schema representing a Pokémon.")
 class Pokemon(relay.Node):
     """GraphQL schema for Pokémon.
 

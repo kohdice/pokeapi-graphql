@@ -12,8 +12,7 @@ class PasswordService(PasswordServiceABC):
 
     """
 
-    @staticmethod
-    def hash(password: str) -> str:
+    def hash(self, password: str) -> str:
         """Hash a password using argon2.
 
         Args:
@@ -30,8 +29,7 @@ class PasswordService(PasswordServiceABC):
 
         return hashed_password
 
-    @staticmethod
-    def verify(password: str, hashed_password: str) -> bool:
+    def verify(self, password: str, hashed_password: str) -> bool:
         """Verify a password using argon2.
 
         Args:

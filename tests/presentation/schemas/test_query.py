@@ -5,11 +5,11 @@ from pokeapi.dependencies.context import get_context
 from pokeapi.presentation.schemas.query import Query
 
 
+# TODO: Fix the test to support `strawberry.relay`.
+@pytest.mark.skip(
+    reason="When testing a Query class that uses strawberry.relay with Schema.execute_sync, it fails."
+)
 class TestQuery:
-    # TODO: Fix test
-    @pytest.mark.skip(
-        reason="It succeeds individually, but fails when considered as a whole."
-    )
     def test_pokemon_query(self) -> None:
         query = """
             query testPokemon($id: GlobalID!) {
@@ -92,10 +92,6 @@ class TestQuery:
             ],
         }
 
-    # TODO: Fix test
-    @pytest.mark.skip(
-        reason="An error occurred. TypeError: Query fields cannot be resolved."
-    )
     def test_pokemons_query(self) -> None:
         query = """
                 fragment PokemonInfo on Pokemon {
@@ -152,10 +148,6 @@ class TestQuery:
         assert result.data is not None
         assert len(result.data["pokemons"]["edges"]) == 2
 
-    # TODO: Fix test
-    @pytest.mark.skip(
-        reason="It succeeds individually, but fails when considered as a whole."
-    )
     def test_type_query(self) -> None:
         query = """
             query testPokemonType($id: GlobalID!) {
@@ -181,10 +173,6 @@ class TestQuery:
             "typeName": "くさ",
         }
 
-    # TODO: Fix test
-    @pytest.mark.skip(
-        reason="It succeeds individually, but fails when considered as a whole."
-    )
     def test_ability_query(self) -> None:
         query = """
             query testPokemonAbility($id: GlobalID!) {

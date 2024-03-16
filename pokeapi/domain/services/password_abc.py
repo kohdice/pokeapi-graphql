@@ -9,9 +9,8 @@ class PasswordServiceABC(ABC):
 
     """
 
-    @staticmethod
     @abstractmethod
-    def hash(password: str) -> str:
+    def hash(self, password: str) -> str:
         """Hash a password
 
         Args:
@@ -23,9 +22,8 @@ class PasswordServiceABC(ABC):
         """
         pass  # pragma: no cover
 
-    @staticmethod
     @abstractmethod
-    def verify(password: str, hashed_password: str) -> bool:
+    def verify(self, password: str, hashed_password: str) -> bool:
         """Verify a password
 
         Args:

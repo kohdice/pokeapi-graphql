@@ -109,7 +109,7 @@ class TokenService(TokenServiceABC):
         access_token = self._jwt_service.create_token(entity, exp, jti)
         refresh_token = str(uuid.uuid4())
 
-        self._whitelist_repo.create(
+        self._whitelist_repo.update(
             entity=TokenWhitelist(
                 id_=whitelist_id,
                 user_id=entity.id_,
