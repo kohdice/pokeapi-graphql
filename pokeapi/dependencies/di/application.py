@@ -8,6 +8,8 @@ from pokeapi.application.services.pokemon_ability import AbilityService
 from pokeapi.application.services.pokemon_ability_abc import AbilityServiceABC
 from pokeapi.application.services.pokemon_type import TypeService
 from pokeapi.application.services.pokemon_type_abc import TypeServiceABC
+from pokeapi.application.services.user import UserService
+from pokeapi.application.services.user_abc import UserServiceABC
 
 
 class ApplicationServiceModule(Module):
@@ -29,3 +31,4 @@ class ApplicationServiceModule(Module):
         binder.bind(AbilityServiceABC, to=AbilityService, scope=singleton)  # type: ignore[type-abstract]
         binder.bind(PokemonServiceABC, to=PokemonService, scope=singleton)  # type: ignore[type-abstract]
         binder.bind(TypeServiceABC, to=TypeService, scope=singleton)  # type: ignore[type-abstract]
+        binder.bind(UserServiceABC, to=UserService, scope=singleton)  # type: ignore[type-abstract].bind
