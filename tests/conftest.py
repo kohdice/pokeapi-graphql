@@ -17,6 +17,8 @@ from pokeapi.application.services.pokemon_ability import AbilityService
 from pokeapi.application.services.pokemon_ability_abc import AbilityServiceABC
 from pokeapi.application.services.pokemon_type import TypeService
 from pokeapi.application.services.pokemon_type_abc import TypeServiceABC
+from pokeapi.application.services.user import UserService
+from pokeapi.application.services.user_abc import UserServiceABC
 from pokeapi.dependencies.settings.config import AppConfig
 from pokeapi.dependencies.settings.config_abc import AppConfigABC
 from pokeapi.domain.entities.pokemon import Pokemon
@@ -160,6 +162,11 @@ def container() -> Injector:
             to=MagicMock(spec=TypeService, autospec=True),
             scope=singleton,
         )
+        binder.bind(
+            UserServiceABC,  # type: ignore
+            to=MagicMock(spec=UserService, autospec=True),
+            scope=singleton,
+        )
 
         # Domain Services
         binder.bind(
@@ -253,6 +260,11 @@ def refreshed_access_token(container: Injector) -> str:
 
 
 @pytest.fixture(scope="session")
+def mock_access_request(access_token: str) -> MockRequest:
+    return MockRequest(headers={"Authorization": f"Bearer {access_token}"})
+
+
+@pytest.fixture(scope="session")
 def mock_refresh_request() -> MockRequest:
     return MockRequest(headers={"Authorization": f"Bearer {TEST_UUID}"})
 
@@ -263,6 +275,17 @@ def mock_info(container: Injector) -> MockInfo:
         context={
             "container": container,
             "request": MockRequest(),
+            "response": Response(),
+        }
+    )
+
+
+@pytest.fixture(scope="session")
+def mock_access_info(container: Injector, mock_access_request: MockRequest) -> MockInfo:
+    return MockInfo(
+        context={
+            "container": container,
+            "request": mock_access_request,
             "response": Response(),
         }
     )
