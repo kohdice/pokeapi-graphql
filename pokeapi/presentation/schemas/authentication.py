@@ -1,5 +1,7 @@
 import strawberry
 
+from pokeapi.domain.entities.token import Token
+
 
 @strawberry.type(description="A schema representing an authentication result.")
 class AuthResult:
@@ -19,6 +21,24 @@ class AuthResult:
     refresh_token: str = strawberry.field(description="The refresh token.")
     token_type: str = strawberry.field(description="The token type.")
 
+    @classmethod
+    def from_entity(cls, entity: Token) -> "AuthResult":
+        """Create an authentication result schema from a token entity.
+
+        Args:
+            entity (Token): The token entity.
+
+        Returns:
+            AuthResult: The authentication result schema.
+
+        """
+
+        return cls(
+            access_token=entity.access_token,
+            refresh_token=entity.refresh_token,
+            token_type=entity.token_type,
+        )
+
 
 @strawberry.type(description="A schema representing an authentication error.")
 class AuthErrors:
@@ -33,3 +53,16 @@ class AuthErrors:
     """
 
     message: str = strawberry.field(description="The error message.")
+
+    @classmethod
+    def from_exception(cls, exception: Exception) -> "AuthErrors":
+        """Create an authentication error schema from an exception.
+
+        Args:
+            exception (Exception): The exception.
+
+        Returns:
+            AuthErrors: The authentication error schema.
+
+        """
+        return cls(message=str(exception))
