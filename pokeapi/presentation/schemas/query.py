@@ -31,7 +31,6 @@ class Query:
         description="Returns a Pokémon Ability resource by ID."
     )
 
-    # TODO: Fix test it.
     @relay.connection(relay.ListConnection[Pokemon], description="List of Pokémon.")
     def pokemons(self, info: Info) -> Iterable[Pokemon]:  # pragma: no cover
         """Returns a list of Pokémon resources.
