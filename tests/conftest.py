@@ -3,7 +3,9 @@ from dataclasses import dataclass, field
 from unittest.mock import MagicMock
 
 import pytest
+from freezegun import freeze_time
 from injector import Binder, Injector, singleton
+from jose import jwt
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 
@@ -207,6 +209,55 @@ def container() -> Injector:
 
 
 @pytest.fixture(scope="session")
+@freeze_time(ISSUE_DATETIME)
+def access_token(container: Injector) -> str:
+    config = container.get(AppConfig)
+    expiration = datetime.datetime.utcnow() + datetime.timedelta(
+        hours=config.access_token_lifetime
+    )
+    data = {
+        "iss": config.app_domain,
+        "sub": "1",
+        "exp": expiration.timestamp(),
+        "iat": datetime.datetime.utcnow().timestamp(),
+        "jti": TEST_UUID,
+        "username": "Red",
+    }
+
+    token = jwt.encode(data, config.private_key, algorithm=config.jwt_algorithm)
+    assert isinstance(token, str)
+
+    return token
+
+
+@pytest.fixture(scope="session")
+@freeze_time(EXECUTION_DATETIME)
+def refreshed_access_token(container: Injector) -> str:
+    config = container.get(AppConfig)
+    expiration = datetime.datetime.utcnow() + datetime.timedelta(
+        hours=config.access_token_lifetime
+    )
+    data = {
+        "iss": config.app_domain,
+        "sub": "1",
+        "exp": expiration.timestamp(),
+        "iat": datetime.datetime.utcnow().timestamp(),
+        "jti": TEST_UUID,
+        "username": "Red",
+    }
+
+    token = jwt.encode(data, config.private_key, algorithm=config.jwt_algorithm)
+    assert isinstance(token, str)
+
+    return token
+
+
+@pytest.fixture(scope="session")
+def mock_refresh_request() -> MockRequest:
+    return MockRequest(headers={"Authorization": f"Bearer {TEST_UUID}"})
+
+
+@pytest.fixture(scope="session")
 def mock_info(container: Injector) -> MockInfo:
     return MockInfo(
         context={
@@ -218,20 +269,13 @@ def mock_info(container: Injector) -> MockInfo:
 
 
 @pytest.fixture(scope="session")
-def mock_refresh_info(container: Injector) -> MockInfo:
+def mock_refresh_info(
+    container: Injector, mock_refresh_request: MockRequest
+) -> MockInfo:
     return MockInfo(
         context={
             "container": container,
-            "request": MockRequest(
-                headers={"Authorization": f"Bearer {TEST_UUID}"},
-            ),
+            "request": mock_refresh_request,
             "response": Response(),
         }
     )
-
-
-@pytest.fixture(scope="session")
-def mock_context(container: Injector) -> dict:
-    return {
-        "container": container,
-    }
