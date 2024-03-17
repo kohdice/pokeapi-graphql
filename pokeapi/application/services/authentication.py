@@ -5,8 +5,6 @@ from injector import inject, singleton
 
 from pokeapi.dependencies.settings.config import AppConfigABC
 from pokeapi.domain.entities.token import Token
-from pokeapi.domain.entities.token_whitelist import TokenWhitelist
-from pokeapi.domain.entities.user import User
 from pokeapi.domain.repositories.token_whitelist import TokenWhitelistRepositoryABC
 from pokeapi.domain.repositories.user import UserRepositoryABC
 from pokeapi.domain.services.password_abc import PasswordServiceABC
@@ -80,7 +78,7 @@ class AuthenticationService(AuthenticationServiceABC):
             AuthenticationError: If the user is not found or the password is incorrect.
 
         """
-        user: User | None = self._user_repo.get_by_username(username)
+        user = self._user_repo.get_by_username(username)
 
         if user is None:
             self._logger.info(
@@ -123,9 +121,7 @@ class AuthenticationService(AuthenticationServiceABC):
         exp = datetime.datetime.now() - datetime.timedelta(
             hours=self._config.refresh_token_lifetime
         )
-        valid_token: TokenWhitelist | None = (
-            self._token_whitelist_repo.get_by_refresh_token(token, exp)
-        )
+        valid_token = self._token_whitelist_repo.get_by_refresh_token(token, exp)
 
         if valid_token is None:
             self._logger.info(
@@ -133,40 +129,18 @@ class AuthenticationService(AuthenticationServiceABC):
             )
             raise AuthenticationError("User is not authenticated.")
 
-        user: User | None = self._user_repo.get_by_id(valid_token.user_id)
+        user = self._user_repo.get_by_id(valid_token.user_id)
 
         if user is None:
             self._logger.info(
                 ValueError(
                     "The user associated with the specified refresh token was not found."
+                    f"user_id: {valid_token.user_id}"
                 )
             )
             raise UserNotFoundError("User not found.")
 
         # NOTE: Delete expired tokens.
-        exp = datetime.datetime.now() - datetime.timedelta(
-            hours=self._config.refresh_token_lifetime
-        )
         self._token_whitelist_repo.delete(user.id_, exp)
 
         return self._token_service.update(user, valid_token.id_)
-
-    def create_user(self, username: str, password: str) -> Token:
-        """Create a new user and return a token.
-
-        This method creates a new user with the given username and password and returns a token for
-        the new user.
-
-        Args:
-            username (str): The username of the new user.
-            password (str): The password of the new user.
-
-        Returns:
-            Token: The token issued to the new user.
-
-        """
-        user = User(username=username, password=self._password_service.hash(password))
-
-        created_user = self._user_repo.create(user)
-
-        return self._token_service.create(created_user)

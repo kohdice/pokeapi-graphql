@@ -37,17 +37,3 @@ class AuthenticationServiceABC(ABC):
 
         """
         pass  # pragma: no cover
-
-    @abstractmethod
-    def create_user(self, username: str, password: str) -> Token:
-        """Create a new user with the given credentials.
-
-        Args:
-            username (str): The username of the new user.
-            password (str): The password of the new user.
-
-        Returns:
-            Token: The token issued to the new user.
-
-        """
-        pass  # pragma: no cover
