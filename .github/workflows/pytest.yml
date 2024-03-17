@@ -26,7 +26,7 @@ jobs:
         run: |
           docker-compose up -d --build
       - name: Wait for pokeapi to start
-        run: sleep 10s
+        run: sleep 30s
       - name: Run pytest
         run: |
           docker-compose exec -T app poetry run pytest --cov=. --cov-branch --cov-report=xml
