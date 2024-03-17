@@ -148,12 +148,12 @@ class TestMutation:
         mutation = """
             mutation testCreateUser($input: UserInput!) {
                 userCreate(input: $input) {
-                    ... on AuthResult {
+                    ... on UserCreationResult {
                         accessToken
                         refreshToken
                         tokenType
                     }
-                    ... on AuthErrors {
+                    ... on UserErrors {
                         message
                     }
                 }

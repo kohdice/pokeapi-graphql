@@ -1,8 +1,10 @@
 import pytest
+from freezegun import freeze_time
 from strawberry import Schema
 
 from pokeapi.dependencies.context import get_context
 from pokeapi.presentation.schemas.query import Query
+from tests.conftest import EXECUTION_DATETIME, MockRequest
 
 
 # TODO: Fix the test to support `strawberry.relay`.
@@ -197,3 +199,26 @@ class TestQuery:
             "id": "UG9rZW1vbkFiaWxpdHk6NjU=",
             "abilityName": "しんりょく",
         }
+
+    @pytest.mark.usefixtures("_setup_token_whitelist_for_user")
+    @freeze_time(EXECUTION_DATETIME)
+    def test_user_query(self, mock_access_request: MockRequest) -> None:
+        query = """
+            query testUser {
+                user {
+                    ... on User {
+                        username
+                    }
+                    ... on UserErrors {
+                        message
+                    }
+                }
+            }
+        """
+        context = get_context()
+        context["request"] = mock_access_request
+        schema = Schema(query=Query)
+        result = schema.execute_sync(query, context_value=context)
+        assert result.errors is None
+        assert result.data is not None
+        assert result.data["user"] == {"username": "Red"}

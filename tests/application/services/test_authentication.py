@@ -60,12 +60,3 @@ class TestAuthenticationService:
         service._user_repo.get_by_id = MagicMock(return_value=None)  # type: ignore
         with pytest.raises(UserNotFoundError):
             service.refresh("no_user_refresh_token")
-
-    def test_create_user(self, service: AuthenticationService) -> None:
-        service._password_service.hash = MagicMock(return_value="hashed_password")  # type: ignore
-        service._token_service.create = MagicMock(return_value=TEST_TOKEN_ENTITY)  # type: ignore
-        actual = service.create_user("mock_user", "password")
-
-        assert actual.access_token == "access_token"
-        assert actual.refresh_token == "refresh_token"
-        assert actual.token_type == "Bearer"

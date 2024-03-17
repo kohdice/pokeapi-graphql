@@ -43,8 +43,8 @@ class TestUserCreationResolver:
     def test_create_user(self, mock_info: MockInfo) -> None:
         container = mock_info.context["container"]
         service = container.get(UserService)
-        service._password_service.hash = MagicMock(return_value="hashed_password")  # type: ignore
-        service._token_service.create = MagicMock(return_value=TEST_TOKEN_ENTITY)  # type: ignore
+        service._password_service.hash = MagicMock(return_value="hashed_password")
+        service._token_service.create = MagicMock(return_value=TEST_TOKEN_ENTITY)
         actual = create_user(
             UserInput(username="mock", password="password"),
             mock_info,  # type: ignore

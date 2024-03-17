@@ -1,5 +1,4 @@
 import datetime
-import uuid
 
 import pytest
 from cryptography.hazmat.backends import default_backend
@@ -14,7 +13,7 @@ from pokeapi.dependencies.settings.config import AppConfig
 from pokeapi.domain.entities.user import User
 from pokeapi.domain.services.jwt import JWTService
 from pokeapi.exceptions.token import TokenVerificationError
-from tests.conftest import EXECUTION_DATETIME, ISSUE_DATETIME
+from tests.conftest import EXECUTION_DATETIME, ISSUE_DATETIME, TEST_UUID
 
 
 @pytest.fixture(scope="module")
@@ -40,7 +39,7 @@ def dummy_private_key() -> str:
 @freeze_time(ISSUE_DATETIME)
 def exp(container: Injector) -> datetime.datetime:
     config = container.get(AppConfig)
-    exp = datetime.datetime.utcnow() + datetime.timedelta(
+    exp = datetime.datetime.now() + datetime.timedelta(
         hours=config.access_token_lifetime
     )
     return exp
@@ -49,12 +48,7 @@ def exp(container: Injector) -> datetime.datetime:
 @pytest.fixture(scope="module")
 @freeze_time(ISSUE_DATETIME)
 def iat() -> datetime.datetime:
-    return datetime.datetime.utcnow()
-
-
-@pytest.fixture(scope="module")
-def jti() -> str:
-    return str(uuid.uuid4())
+    return datetime.datetime.now()
 
 
 @pytest.fixture(scope="module")
@@ -63,7 +57,6 @@ def access_token(
     container: Injector,
     exp: datetime.datetime,
     iat: datetime.datetime,
-    jti: str,
 ) -> str:
     config = container.get(AppConfig)
 
@@ -72,7 +65,7 @@ def access_token(
         "sub": "1",
         "exp": exp.timestamp(),
         "iat": iat.timestamp(),
-        "jti": jti,
+        "jti": TEST_UUID,
         "username": "Red",
     }
 
@@ -88,7 +81,6 @@ def access_token_invalid_issuer(
     container: Injector,
     exp: datetime.datetime,
     iat: datetime.datetime,
-    jti: str,
 ) -> str:
     config = container.get(AppConfig)
 
@@ -97,7 +89,7 @@ def access_token_invalid_issuer(
         "sub": "1",
         "exp": exp.timestamp(),
         "iat": iat.timestamp(),
-        "jti": jti,
+        "jti": TEST_UUID,
         "username": "Red",
     }
 
@@ -114,7 +106,6 @@ def access_token_invalid_signature(
     dummy_private_key: str,
     exp: datetime.datetime,
     iat: datetime.datetime,
-    jti: str,
 ) -> str:
     config = container.get(AppConfig)
 
@@ -123,34 +114,11 @@ def access_token_invalid_signature(
         "sub": "1",
         "exp": exp.timestamp(),
         "iat": iat.timestamp(),
-        "jti": jti,
+        "jti": TEST_UUID,
         "username": "Red",
     }
 
     actual = jwt.encode(data, dummy_private_key, algorithm=config.jwt_algorithm)
-    assert isinstance(actual, str)
-
-    return actual
-
-
-@pytest.fixture(scope="module")
-@freeze_time(ISSUE_DATETIME)
-def access_token_no_jti(
-    container: Injector,
-    exp: datetime.datetime,
-    iat: datetime.datetime,
-) -> str:
-    config = container.get(AppConfig)
-
-    data = {
-        "iss": config.app_domain,
-        "sub": "1",
-        "exp": exp.timestamp(),
-        "iat": iat.timestamp(),
-        "username": "Red",
-    }
-
-    actual = jwt.encode(data, config.private_key, algorithm=config.jwt_algorithm)
     assert isinstance(actual, str)
 
     return actual
@@ -162,11 +130,10 @@ class TestJWTServices:
         self,
         service: JWTService,
         exp: datetime.datetime,
-        jti: str,
         access_token: str,
     ) -> None:
         user = User(id_=1, username="Red", password="password")
-        token = service.create_token(user, exp, jti)
+        token = service.create_token(user, exp, TEST_UUID)
 
         assert token == access_token
 
@@ -175,13 +142,12 @@ class TestJWTServices:
         self,
         service: JWTService,
         exp: datetime.datetime,
-        jti: str,
         mocker: MockerFixture,
     ) -> None:
         user = User(id_=1, username="Red", password="password")
         mocker.patch("jose.jwt.encode", return_value=1)
         with pytest.raises(TypeError):
-            service.create_token(user, exp, jti)
+            service.create_token(user, exp, TEST_UUID)
 
     @freeze_time(EXECUTION_DATETIME)
     def test_decode_token(
@@ -190,7 +156,6 @@ class TestJWTServices:
         service: JWTService,
         exp: datetime.datetime,
         iat: datetime.datetime,
-        jti: str,
         access_token: str,
     ) -> None:
         config = container.get(AppConfig)
@@ -200,7 +165,7 @@ class TestJWTServices:
         assert actual["sub"] == "1"
         assert actual["exp"] == exp.timestamp()
         assert actual["iat"] == iat.timestamp()
-        assert actual["jti"] == jti
+        assert actual["jti"] == TEST_UUID
         assert actual["username"] == "Red"
 
     @freeze_time(EXECUTION_DATETIME)
@@ -222,11 +187,6 @@ class TestJWTServices:
     ) -> None:
         with pytest.raises(TokenVerificationError):
             service.decode_token(access_token_invalid_signature)
-
-    @freeze_time(EXECUTION_DATETIME)
-    def test_decode_no_jti(self, service: JWTService, access_token_no_jti: str) -> None:
-        with pytest.raises(TokenVerificationError):
-            service.decode_token(access_token_no_jti)
 
     @freeze_time(EXECUTION_DATETIME)
     def test_decode_invalid_type(

@@ -2,8 +2,7 @@ from unittest.mock import MagicMock
 
 from pokeapi.application.services.authentication import AuthenticationService
 from pokeapi.exceptions.authentication import AuthenticationError
-from pokeapi.exceptions.user import UserCreationError
-from pokeapi.presentation.resolvers.authentication import auth, create_user, refresh
+from pokeapi.presentation.resolvers.authentication import auth, refresh
 from pokeapi.presentation.schemas.authentication import AuthErrors, AuthResult
 from tests.conftest import TEST_TOKEN_ENTITY, TEST_USER_INPUT, MockInfo
 
@@ -29,6 +28,8 @@ class TestAuthResolver:
         assert isinstance(actual, AuthErrors)
         assert actual.message == "error"
 
+
+class TestRefreshResolver:
     def test_refresh(self, mock_refresh_info: MockInfo) -> None:
         container = mock_refresh_info.context["container"]
         service = container.get(AuthenticationService)
@@ -60,26 +61,6 @@ class TestAuthResolver:
         service = container.get(AuthenticationService)
         service.refresh = MagicMock(side_effect=AuthenticationError("error"))
         actual = refresh(mock_refresh_info)  # type: ignore
-
-        assert isinstance(actual, AuthErrors)
-        assert actual.message == "error"
-
-    def test_user_create(self, mock_info: MockInfo) -> None:
-        container = mock_info.context["container"]
-        service = container.get(AuthenticationService)
-        service.create_user = MagicMock(return_value=TEST_TOKEN_ENTITY)
-        actual = create_user(TEST_USER_INPUT, mock_info)  # type: ignore
-
-        assert isinstance(actual, AuthResult)
-        assert actual.access_token == "access_token"
-        assert actual.refresh_token == "refresh_token"
-        assert actual.token_type == "Bearer"
-
-    def test_user_create_error(self, mock_info: MockInfo) -> None:
-        container = mock_info.context["container"]
-        service = container.get(AuthenticationService)
-        service.create_user = MagicMock(side_effect=UserCreationError("error"))
-        actual = create_user(TEST_USER_INPUT, mock_info)  # type: ignore
 
         assert isinstance(actual, AuthErrors)
         assert actual.message == "error"

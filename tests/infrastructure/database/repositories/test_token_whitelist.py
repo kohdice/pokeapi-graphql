@@ -35,7 +35,7 @@ def mock_session() -> MagicMock:
 
 
 @pytest.fixture(scope="module")
-def setup_for_user(container: Injector) -> Generator:
+def setup_user(container: Injector) -> Generator:
     session = container.get(Session)
     record = session.execute(
         insert(User).values(
@@ -55,14 +55,14 @@ def setup_for_user(container: Injector) -> Generator:
 
 
 @pytest.fixture()
-def setup_for_token(
+def setup_token_whitelist(
     container: Injector,
-    setup_for_user: int,
+    setup_user: int,
 ) -> Generator:
     session = container.get(Session)
     record = session.execute(
         insert(TokenWhitelistModel).values(
-            user_id=setup_for_user,
+            user_id=setup_user,
             access_token="foo",
             refresh_token="bar",
             created_by="test_repository",
@@ -85,12 +85,12 @@ def setup_for_token(
 
 
 @pytest.fixture()
-def _teardown_for_create(container: Injector, setup_for_user: int) -> Generator:
+def _teardown_for_create(container: Injector, setup_user: int) -> Generator:
     yield
 
     session = container.get(Session)
     session.execute(
-        delete(TokenWhitelistModel).where(TokenWhitelistModel.user_id == setup_for_user)
+        delete(TokenWhitelistModel).where(TokenWhitelistModel.user_id == setup_user)
     )
     session.commit()
 
@@ -115,16 +115,16 @@ class TestTokenWhitelistRepository:
         assert actual.access_token == "foo"
         assert actual.refresh_token == "bar"
 
-    @pytest.mark.usefixtures("setup_for_token")
+    @pytest.mark.usefixtures("setup_token_whitelist")
     @freeze_time(EXECUTION_DATETIME)
     def test_get_by_access_token(
-        self, repo: TokenWhitelistRepository, setup_for_user: int
+        self, repo: TokenWhitelistRepository, setup_user: int
     ) -> None:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
         actual = repo.get_by_access_token("foo", expiration)
 
         assert isinstance(actual, TokenWhitelistEntity)
-        assert actual.user_id == setup_for_user
+        assert actual.user_id == setup_user
         assert actual.access_token == "foo"
 
     def test_get_by_access_token_not_found(
@@ -135,16 +135,16 @@ class TestTokenWhitelistRepository:
 
         assert actual is None
 
-    @pytest.mark.usefixtures("setup_for_token")
+    @pytest.mark.usefixtures("setup_token_whitelist")
     @freeze_time(EXECUTION_DATETIME)
     def test_get_by_refresh_token(
-        self, repo: TokenWhitelistRepository, setup_for_user: int
+        self, repo: TokenWhitelistRepository, setup_user: int
     ) -> None:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
         actual = repo.get_by_refresh_token("bar", expiration)
 
         assert isinstance(actual, TokenWhitelistEntity)
-        assert actual.user_id == setup_for_user
+        assert actual.user_id == setup_user
         assert actual.refresh_token == "bar"
 
     def test_get_by_refresh_token_not_found(
@@ -160,10 +160,10 @@ class TestTokenWhitelistRepository:
     def test_create(
         self,
         repo: TokenWhitelistRepository,
-        setup_for_user: int,
+        setup_user: int,
     ) -> None:
         entity = TokenWhitelistEntity(
-            user_id=setup_for_user,
+            user_id=setup_user,
             access_token="foo",
             refresh_token="bar",
             created_by="test_repository",
@@ -174,7 +174,7 @@ class TestTokenWhitelistRepository:
 
         actual = repo.create(entity)
 
-        assert actual.user_id == setup_for_user
+        assert actual.user_id == setup_user
         assert actual.access_token == "foo"
         assert actual.refresh_token == "bar"
 
@@ -217,12 +217,12 @@ class TestTokenWhitelistRepository:
         self,
         container: Injector,
         repo: TokenWhitelistRepository,
-        setup_for_user: int,
-        setup_for_token: int,
+        setup_user: int,
+        setup_token_whitelist: int,
     ) -> None:
         entity = TokenWhitelistEntity(
-            id_=setup_for_token,
-            user_id=setup_for_user,
+            id_=setup_token_whitelist,
+            user_id=setup_user,
             access_token="baz",
             refresh_token="qux",
             created_by="test_repository",
@@ -235,12 +235,12 @@ class TestTokenWhitelistRepository:
         session = container.get(Session)
         actual = session.execute(
             select(TokenWhitelistModel).where(
-                TokenWhitelistModel.id_ == setup_for_token
+                TokenWhitelistModel.id_ == setup_token_whitelist
             )
         ).scalar()
 
         assert actual is not None
-        assert actual.user_id == setup_for_user
+        assert actual.user_id == setup_user
         assert actual.access_token == "baz"
         assert actual.refresh_token == "qux"
 
@@ -282,22 +282,22 @@ class TestTokenWhitelistRepository:
         with pytest.raises(TokenUpdateError):
             repo.update(entity)
 
-    @pytest.mark.usefixtures("setup_for_token")
+    @pytest.mark.usefixtures("setup_token_whitelist")
     @freeze_time("2999-01-01 01:00:00")
     def test_delete(
         self,
         container: Injector,
         repo: TokenWhitelistRepository,
-        setup_for_user: int,
+        setup_user: int,
     ) -> None:
         expiration = datetime.datetime.now() - datetime.timedelta(hours=1)
-        repo.delete(setup_for_user, expiration)
+        repo.delete(setup_user, expiration)
 
         session = container.get(Session)
         actual = session.execute(
             select(TokenWhitelistModel).where(
                 and_(
-                    TokenWhitelistModel.user_id == setup_for_user,
+                    TokenWhitelistModel.user_id == setup_user,
                     TokenWhitelistModel.deleted_at.isnot(None),
                 )
             )

@@ -27,11 +27,11 @@ class TestUserService:
 
         service.get_by_token("token")
 
-    def test_get_by_token_not_found_whotelist(self, service: UserService) -> None:
+    def test_get_by_token_not_found_whitelist(self, service: UserService) -> None:
         service._token_service.extract_payload = MagicMock(  # type: ignore
             return_value={"sub": 1, "jti": "test_jti", "username": "Red"}
         )
-        service._token_whitelist_repo.get_by_access_token = MagicMock(return_value=None)
+        service._token_whitelist_repo.get_by_access_token = MagicMock(return_value=None)  # type: ignore
 
         with pytest.raises(AuthorizationError):
             service.get_by_token("not_found_token")
