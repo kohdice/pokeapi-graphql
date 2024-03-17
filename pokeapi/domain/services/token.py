@@ -67,7 +67,7 @@ class TokenService(TokenServiceABC):
 
         """
         jti = str(uuid.uuid4())
-        exp = datetime.datetime.utcnow() + datetime.timedelta(
+        exp = datetime.datetime.now() + datetime.timedelta(
             hours=self._config.access_token_lifetime
         )
         access_token = self._jwt_service.create_token(entity, exp, jti)
@@ -106,7 +106,7 @@ class TokenService(TokenServiceABC):
 
         """
         jti = str(uuid.uuid4())
-        exp = datetime.datetime.utcnow() + datetime.timedelta(
+        exp = datetime.datetime.now() + datetime.timedelta(
             hours=self._config.access_token_lifetime
         )
         access_token = self._jwt_service.create_token(entity, exp, jti)
