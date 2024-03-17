@@ -1,4 +1,5 @@
 import datetime
+from collections.abc import Generator
 from dataclasses import dataclass, field
 from unittest.mock import MagicMock
 
@@ -6,6 +7,7 @@ import pytest
 from freezegun import freeze_time
 from injector import Binder, Injector, singleton
 from jose import jwt
+from sqlalchemy import delete, insert
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 
@@ -17,6 +19,8 @@ from pokeapi.application.services.pokemon_ability import AbilityService
 from pokeapi.application.services.pokemon_ability_abc import AbilityServiceABC
 from pokeapi.application.services.pokemon_type import TypeService
 from pokeapi.application.services.pokemon_type_abc import TypeServiceABC
+from pokeapi.application.services.user import UserService
+from pokeapi.application.services.user_abc import UserServiceABC
 from pokeapi.dependencies.settings.config import AppConfig
 from pokeapi.dependencies.settings.config_abc import AppConfigABC
 from pokeapi.domain.entities.pokemon import Pokemon
@@ -26,7 +30,9 @@ from pokeapi.domain.entities.pokemon_type import PokemonType
 from pokeapi.domain.entities.pokemons_ability import PokemonsAbility
 from pokeapi.domain.entities.pokemons_type import PokemonsType
 from pokeapi.domain.entities.token import Token
-from pokeapi.domain.entities.token_whitelist import TokenWhitelist
+from pokeapi.domain.entities.token_whitelist import (
+    TokenWhitelist as TokenWhitelistEntity,
+)
 from pokeapi.domain.entities.user import User
 from pokeapi.domain.repositories.pokemon import PokemonRepositoryABC
 from pokeapi.domain.repositories.pokemon_ability import AbilityRepositoryABC
@@ -40,6 +46,9 @@ from pokeapi.domain.services.password_abc import PasswordServiceABC
 from pokeapi.domain.services.token import TokenService
 from pokeapi.domain.services.token_abc import TokenServiceABC
 from pokeapi.infrastructure.database.db import session_factory
+from pokeapi.infrastructure.database.models.token_whitelist import (
+    TokenWhitelist as TokenWhitelistModel,
+)
 from pokeapi.infrastructure.database.repositories.pokemon import PokemonRepository
 from pokeapi.infrastructure.database.repositories.pokemon_ability import (
     AbilityRepository,
@@ -110,7 +119,7 @@ TEST_USER_ENTITY = User(id_=1, username="Red", password="hashed_password")
 TEST_TOKEN_ENTITY = Token(
     access_token="access_token", refresh_token="refresh_token", token_type="Bearer"
 )
-TEST_TOKEN_WHITELIST_ENTITY = TokenWhitelist(
+TEST_TOKEN_WHITELIST_ENTITY = TokenWhitelistEntity(
     id_=1,
     user_id=1,
     access_token="access_token",
@@ -158,6 +167,11 @@ def container() -> Injector:
         binder.bind(
             TypeServiceABC,  # type: ignore
             to=MagicMock(spec=TypeService, autospec=True),
+            scope=singleton,
+        )
+        binder.bind(
+            UserServiceABC,  # type: ignore
+            to=MagicMock(spec=UserService, autospec=True),
             scope=singleton,
         )
 
@@ -212,14 +226,14 @@ def container() -> Injector:
 @freeze_time(ISSUE_DATETIME)
 def access_token(container: Injector) -> str:
     config = container.get(AppConfig)
-    expiration = datetime.datetime.utcnow() + datetime.timedelta(
+    expiration = datetime.datetime.now() + datetime.timedelta(
         hours=config.access_token_lifetime
     )
     data = {
         "iss": config.app_domain,
         "sub": "1",
         "exp": expiration.timestamp(),
-        "iat": datetime.datetime.utcnow().timestamp(),
+        "iat": datetime.datetime.now().timestamp(),
         "jti": TEST_UUID,
         "username": "Red",
     }
@@ -234,14 +248,14 @@ def access_token(container: Injector) -> str:
 @freeze_time(EXECUTION_DATETIME)
 def refreshed_access_token(container: Injector) -> str:
     config = container.get(AppConfig)
-    expiration = datetime.datetime.utcnow() + datetime.timedelta(
+    expiration = datetime.datetime.now() + datetime.timedelta(
         hours=config.access_token_lifetime
     )
     data = {
         "iss": config.app_domain,
         "sub": "1",
         "exp": expiration.timestamp(),
-        "iat": datetime.datetime.utcnow().timestamp(),
+        "iat": datetime.datetime.now().timestamp(),
         "jti": TEST_UUID,
         "username": "Red",
     }
@@ -250,6 +264,11 @@ def refreshed_access_token(container: Injector) -> str:
     assert isinstance(token, str)
 
     return token
+
+
+@pytest.fixture(scope="session")
+def mock_access_request(access_token: str) -> MockRequest:
+    return MockRequest(headers={"Authorization": f"Bearer {access_token}"})
 
 
 @pytest.fixture(scope="session")
@@ -269,6 +288,17 @@ def mock_info(container: Injector) -> MockInfo:
 
 
 @pytest.fixture(scope="session")
+def mock_access_info(container: Injector, mock_access_request: MockRequest) -> MockInfo:
+    return MockInfo(
+        context={
+            "container": container,
+            "request": mock_access_request,
+            "response": Response(),
+        }
+    )
+
+
+@pytest.fixture(scope="session")
 def mock_refresh_info(
     container: Injector, mock_refresh_request: MockRequest
 ) -> MockInfo:
@@ -279,3 +309,32 @@ def mock_refresh_info(
             "response": Response(),
         }
     )
+
+
+@pytest.fixture()
+def _setup_token_whitelist_for_user(
+    container: Injector,
+) -> Generator:
+    session = container.get(Session)
+    record = session.execute(
+        insert(TokenWhitelistModel).values(
+            user_id=1,
+            access_token=TEST_UUID,
+            refresh_token=TEST_UUID,
+            created_by="Red",
+            created_at=ISSUE_DATETIME,
+            updated_by="Red",
+            updated_at=ISSUE_DATETIME,
+        )
+    )
+    assert record.inserted_primary_key is not None
+    session.commit()
+
+    yield
+
+    session.execute(
+        delete(TokenWhitelistModel).where(
+            TokenWhitelistModel.id_ == record.inserted_primary_key[0]
+        )
+    )
+    session.commit()

@@ -5,6 +5,8 @@ from strawberry import relay
 from strawberry.types.info import Info
 
 from pokeapi.application.services.pokemon_abc import PokemonServiceABC
+from pokeapi.presentation.resolvers.user import get_user_by_token
+from pokeapi.presentation.schemas import USER_PAYLOAD
 from pokeapi.presentation.schemas.pokemon import Pokemon
 from pokeapi.presentation.schemas.pokemon_ability import PokemonAbility
 from pokeapi.presentation.schemas.pokemon_type import PokemonType
@@ -29,6 +31,10 @@ class Query:
     )
     pokemon_ability: PokemonAbility = relay.node(
         description="Returns a Pokémon Ability resource by ID."
+    )
+    user: USER_PAYLOAD = strawberry.field(
+        resolver=get_user_by_token,
+        description="Returns a User resource by access token.",
     )
 
     @relay.connection(relay.ListConnection[Pokemon], description="List of Pokémon.")

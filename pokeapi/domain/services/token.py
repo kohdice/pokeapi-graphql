@@ -1,4 +1,5 @@
 import datetime
+import logging
 import uuid
 
 from injector import inject, singleton
@@ -9,6 +10,7 @@ from pokeapi.domain.entities.token_whitelist import TokenWhitelist
 from pokeapi.domain.entities.user import User
 from pokeapi.domain.repositories.token_whitelist import TokenWhitelistRepositoryABC
 from pokeapi.domain.services.jwt_abc import JWTServiceABC
+from pokeapi.exceptions.token import TokenVerificationError
 
 from .token_abc import TokenServiceABC
 
@@ -47,6 +49,7 @@ class TokenService(TokenServiceABC):
 
         """
         self._config = config
+        self._logger = logging.getLogger(__name__)
         self._jwt_service = jwt_service
         self._whitelist_repo = whitelist_repo
 
@@ -64,7 +67,7 @@ class TokenService(TokenServiceABC):
 
         """
         jti = str(uuid.uuid4())
-        exp = datetime.datetime.utcnow() + datetime.timedelta(
+        exp = datetime.datetime.now() + datetime.timedelta(
             hours=self._config.access_token_lifetime
         )
         access_token = self._jwt_service.create_token(entity, exp, jti)
@@ -103,7 +106,7 @@ class TokenService(TokenServiceABC):
 
         """
         jti = str(uuid.uuid4())
-        exp = datetime.datetime.utcnow() + datetime.timedelta(
+        exp = datetime.datetime.now() + datetime.timedelta(
             hours=self._config.access_token_lifetime
         )
         access_token = self._jwt_service.create_token(entity, exp, jti)
@@ -142,3 +145,46 @@ class TokenService(TokenServiceABC):
             hours=self._config.refresh_token_lifetime
         )
         self._whitelist_repo.delete(entity.id_, token_exp)
+
+    def extract_payload(self, token: str) -> dict:
+        """Extract the payload from a token.
+
+        This method extracts the payload from the given token.
+
+        Args:
+            token (str): The token from which to extract the payload.
+
+        Returns:
+            dict: The payload extracted from the token.
+
+        Raises:
+            TokenVerificationError: If the token is invalid.
+
+        """
+        payload = self._jwt_service.decode_token(token)
+
+        if "sub" not in payload:
+            self._logger.error(
+                TokenVerificationError(
+                    "Token verification failed, the token is invalid as it lacks the 'sub' claim."
+                )
+            )
+            raise TokenVerificationError("Token verification failed.")
+
+        if "jti" not in payload:
+            self._logger.error(
+                TokenVerificationError(
+                    "Token verification failed: The token is invalid as it lacks the 'jti' claim."
+                )
+            )
+            raise TokenVerificationError("Token verification failed.")
+
+        if "username" not in payload:
+            self._logger.error(
+                TokenVerificationError(
+                    "Token verification failed: The token is invalid as it lacks the 'username' claim."
+                )
+            )
+            raise TokenVerificationError("Token verification failed.")
+
+        return payload

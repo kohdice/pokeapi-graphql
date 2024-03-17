@@ -51,7 +51,7 @@ class JWTService(JWTServiceABC):
             "iss": self._config.app_domain,
             "sub": str(entity.id_),
             "exp": exp.timestamp(),
-            "iat": datetime.datetime.utcnow().timestamp(),
+            "iat": datetime.datetime.now().timestamp(),
             "jti": jti,
             "username": entity.username,
         }
@@ -96,13 +96,5 @@ class JWTService(JWTServiceABC):
         # NOTE: The payload is a dict, but the type hint is not recognized.
         if not isinstance(payload, dict):
             raise TypeError("The payload is not a dictionary.")
-
-        if "jti" not in payload:
-            self._logger.error(
-                TokenVerificationError(
-                    "Token verification failed: The token is invalid as it lacks the 'jti' claim."
-                )
-            )
-            raise TokenVerificationError("Token verification failed.")
 
         return payload

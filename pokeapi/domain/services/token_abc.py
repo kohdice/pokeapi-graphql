@@ -47,3 +47,16 @@ class TokenServiceABC(ABC):
 
         """
         pass  # pragma: no cover
+
+    @abstractmethod
+    def extract_payload(self, token: str) -> dict:
+        """Extract the payload from a token.
+
+        Args:
+            token (str): The token from which to extract the payload.
+
+        Returns:
+            dict: The payload extracted from the token.
+
+        """
+        pass  # pragma: no cover
