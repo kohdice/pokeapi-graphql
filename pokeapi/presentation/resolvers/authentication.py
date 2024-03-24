@@ -29,13 +29,9 @@ def auth(input: UserInput, info: Info) -> AuthResult | AuthErrors:  # noqa A002
     try:
         token = service.auth(validated_input.username, validated_input.password)
     except AuthenticationError as e:
-        return AuthErrors(message=str(e))
+        return AuthErrors.from_exception(e)
 
-    return AuthResult(
-        access_token=token.access_token,
-        refresh_token=token.refresh_token,
-        token_type=token.token_type,
-    )
+    return AuthResult.from_entity(token)
 
 
 def refresh(info: Info) -> AuthResult | AuthErrors:  # noqa A002
@@ -55,15 +51,11 @@ def refresh(info: Info) -> AuthResult | AuthErrors:  # noqa A002
     try:
         token = extract_bearer_token(request)
     except AuthorizationError as e:
-        return AuthErrors(message=str(e))
+        return AuthErrors.from_exception(e)
 
     try:
         refreshed_token = service.refresh(token)
     except (AuthenticationError, UserNotFoundError) as e:
-        return AuthErrors(message=str(e))
+        return AuthErrors.from_exception(e)
 
-    return AuthResult(
-        access_token=refreshed_token.access_token,
-        refresh_token=refreshed_token.refresh_token,
-        token_type=refreshed_token.token_type,
-    )
+    return AuthResult.from_entity(refreshed_token)

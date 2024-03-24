@@ -32,12 +32,12 @@ def get_user_by_token(info: Info) -> User | UserErrors:
     try:
         token = extract_bearer_token(request)
     except AuthorizationError as e:
-        return UserErrors(message=str(e))
+        return UserErrors.from_exception(e)
 
     try:
         user = service.get_by_token(token)
     except TokenVerificationError as e:
-        return UserErrors(message=str(e))
+        return UserErrors.from_exception(e)
 
     return User.from_entity(user)
 
@@ -63,6 +63,6 @@ def create_user(
     try:
         token = service.create(validated_input.username, validated_input.password)
     except UserCreationError as e:
-        return UserErrors(message=str(e))
+        return UserErrors.from_exception(e)
 
     return UserCreationResult.from_entity(token)
