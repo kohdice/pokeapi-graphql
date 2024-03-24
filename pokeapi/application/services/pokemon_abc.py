@@ -38,6 +38,19 @@ class PokemonServiceABC(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
+    def get_by_name(self, name: str) -> Pokemon | None:
+        """Retrieve a Pokémon by its name.
+
+        Args:
+            name (str): The name of the Pokémon to retrieve.
+
+        Returns:
+            Pokemon | None: The Pokémon with the specified name, or None if not found.
+
+        """
+        pass  # pragma: no cover
+
+    @abstractmethod
     def get_all(self) -> list[Pokemon]:
         """Retrieve all Pokémon from the repository.
 
