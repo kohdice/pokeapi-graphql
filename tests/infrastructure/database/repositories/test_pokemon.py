@@ -74,6 +74,12 @@ class TestPokemonRepository:
     def test_get_by_id_not_found(self, repo: PokemonRepository) -> None:
         assert repo.get_by_id(0) is None
 
+    def test_get_by_pokedex_number(self, repo: PokemonRepository) -> None:
+        assert repo.get_by_pokedex_number(1) == TEST_POKEMON_ENTITY
+
+    def test_get_by_pokedex_number_not_found(self, repo: PokemonRepository) -> None:
+        assert repo.get_by_pokedex_number(0) is None
+
     def test_get_all(self, repo: PokemonRepository) -> None:
         actual = repo.get_all()
 

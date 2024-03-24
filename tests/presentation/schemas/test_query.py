@@ -46,7 +46,6 @@ class TestQuery:
         """
 
         schema = Schema(query=Query)
-
         result = schema.execute_sync(
             query, variable_values={"id": "UG9rZW1vbjox"}, context_value=get_context()
         )
@@ -54,6 +53,87 @@ class TestQuery:
         assert result.errors is None
         assert result.data is not None
         assert result.data["pokemon"] == {
+            "id": "UG9rZW1vbjox",
+            "nationalPokedexNumber": 1,
+            "name": "フシギダネ",
+            "hp": 45,
+            "attack": 49,
+            "defense": 49,
+            "specialAttack": 65,
+            "specialDefense": 65,
+            "speed": 45,
+            "baseTotal": 318,
+            "types": [
+                {
+                    "pokemonType": {"id": "UG9rZW1vblR5cGU6NQ==", "typeName": "くさ"},
+                    "slot": 1,
+                },
+                {
+                    "pokemonType": {"id": "UG9rZW1vblR5cGU6OA==", "typeName": "どく"},
+                    "slot": 2,
+                },
+            ],
+            "abilities": [
+                {
+                    "pokemonAbility": {
+                        "id": "UG9rZW1vbkFiaWxpdHk6MzQ=",
+                        "abilityName": "ようりょくそ",
+                    },
+                    "slot": 3,
+                    "isHidden": True,
+                },
+                {
+                    "pokemonAbility": {
+                        "id": "UG9rZW1vbkFiaWxpdHk6NjU=",
+                        "abilityName": "しんりょく",
+                    },
+                    "slot": 1,
+                    "isHidden": False,
+                },
+            ],
+        }
+
+    def test_pokemon_by_pokedex_number_query(self) -> None:
+        query = """
+            query testPokemonByPokedexNumber($pokedexNumber: Int!) {
+                pokemonByPokedexNumber(pokedexNumber: $pokedexNumber) {
+                    id
+                    nationalPokedexNumber
+                    name
+                    hp
+                    attack
+                    defense
+                    specialAttack
+                    specialDefense
+                    speed
+                    baseTotal
+                    types {
+                        pokemonType {
+                        id
+                        typeName
+                        }
+                        slot
+                    }
+                    abilities {
+                        pokemonAbility {
+                        id
+                        abilityName
+                        }
+                        slot
+                        isHidden
+                    }
+                }
+            }
+        """
+
+        schema = Schema(query=Query)
+        result = schema.execute_sync(
+            query, variable_values={"pokedexNumber": 1}, context_value=get_context()
+        )
+
+        assert result.errors is None
+        assert result.data is not None
+        assert result.data["pokemonByPokedexNumber"] == {
             "id": "UG9rZW1vbjox",
             "nationalPokedexNumber": 1,
             "name": "フシギダネ",
@@ -143,7 +223,6 @@ class TestQuery:
         """
 
         schema = Schema(query=Query)
-
         result = schema.execute_sync(query, context_value=get_context())
 
         assert result.errors is None
@@ -161,7 +240,6 @@ class TestQuery:
         """
 
         schema = Schema(query=Query)
-
         result = schema.execute_sync(
             query,
             variable_values={"id": "UG9rZW1vblR5cGU6NQ=="},
@@ -186,7 +264,6 @@ class TestQuery:
         """
 
         schema = Schema(query=Query)
-
         result = schema.execute_sync(
             query,
             variable_values={"id": "UG9rZW1vbkFiaWxpdHk6NjU="},
@@ -219,6 +296,7 @@ class TestQuery:
         context["request"] = mock_access_request
         schema = Schema(query=Query)
         result = schema.execute_sync(query, context_value=context)
+
         assert result.errors is None
         assert result.data is not None
         assert result.data["user"] == {"username": "Red"}

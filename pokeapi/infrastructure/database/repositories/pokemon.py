@@ -105,6 +105,30 @@ class PokemonRepository(PokemonRepositoryABC):
 
         return self._convert_to_entity(result)
 
+    def get_by_pokedex_number(self, pokedex_number: int) -> PokemonEntity | None:
+        """Retrieve a Pokémon by its pokedex number.
+
+        Args:
+            pokedex_number (int): The pokedex number of the Pokémon to be retrieved.
+
+        Returns:
+            PokemonEntity | None:
+                The Pokémon with the specified pokedex number, or None if no such Pokémon exists.
+
+        """
+        statement = select(PokemonModel).where(
+            and_(
+                PokemonModel.national_pokedex_number == pokedex_number,
+                PokemonModel.deleted_at.is_(None),
+            )
+        )
+        result = self._db.execute(statement).scalar()
+
+        if result is None:
+            return None
+
+        return self._convert_to_entity(result)
+
     def get_all(self) -> list[PokemonEntity]:
         """Retrieve all Pokémon.
 
