@@ -6,6 +6,47 @@ from pokeapi.dependencies.context import get_context
 from pokeapi.presentation.schemas.query import Query
 from tests.conftest import EXECUTION_DATETIME, MockRequest
 
+TEST_RESPONSE_OF_POKEMON = {
+    "id": "UG9rZW1vbjox",
+    "nationalPokedexNumber": 1,
+    "name": "フシギダネ",
+    "hp": 45,
+    "attack": 49,
+    "defense": 49,
+    "specialAttack": 65,
+    "specialDefense": 65,
+    "speed": 45,
+    "baseTotal": 318,
+    "types": [
+        {
+            "pokemonType": {"id": "UG9rZW1vblR5cGU6NQ==", "typeName": "くさ"},
+            "slot": 1,
+        },
+        {
+            "pokemonType": {"id": "UG9rZW1vblR5cGU6OA==", "typeName": "どく"},
+            "slot": 2,
+        },
+    ],
+    "abilities": [
+        {
+            "pokemonAbility": {
+                "id": "UG9rZW1vbkFiaWxpdHk6MzQ=",
+                "abilityName": "ようりょくそ",
+            },
+            "slot": 3,
+            "isHidden": True,
+        },
+        {
+            "pokemonAbility": {
+                "id": "UG9rZW1vbkFiaWxpdHk6NjU=",
+                "abilityName": "しんりょく",
+            },
+            "slot": 1,
+            "isHidden": False,
+        },
+    ],
+}
+
 
 # TODO: Fix the test to support `strawberry.relay`.
 @pytest.mark.skip(
@@ -52,46 +93,7 @@ class TestQuery:
 
         assert result.errors is None
         assert result.data is not None
-        assert result.data["pokemon"] == {
-            "id": "UG9rZW1vbjox",
-            "nationalPokedexNumber": 1,
-            "name": "フシギダネ",
-            "hp": 45,
-            "attack": 49,
-            "defense": 49,
-            "specialAttack": 65,
-            "specialDefense": 65,
-            "speed": 45,
-            "baseTotal": 318,
-            "types": [
-                {
-                    "pokemonType": {"id": "UG9rZW1vblR5cGU6NQ==", "typeName": "くさ"},
-                    "slot": 1,
-                },
-                {
-                    "pokemonType": {"id": "UG9rZW1vblR5cGU6OA==", "typeName": "どく"},
-                    "slot": 2,
-                },
-            ],
-            "abilities": [
-                {
-                    "pokemonAbility": {
-                        "id": "UG9rZW1vbkFiaWxpdHk6MzQ=",
-                        "abilityName": "ようりょくそ",
-                    },
-                    "slot": 3,
-                    "isHidden": True,
-                },
-                {
-                    "pokemonAbility": {
-                        "id": "UG9rZW1vbkFiaWxpdHk6NjU=",
-                        "abilityName": "しんりょく",
-                    },
-                    "slot": 1,
-                    "isHidden": False,
-                },
-            ],
-        }
+        assert result.data["pokemon"] == TEST_RESPONSE_OF_POKEMON
 
     def test_pokemon_by_pokedex_number_query(self) -> None:
         query = """
@@ -133,46 +135,49 @@ class TestQuery:
 
         assert result.errors is None
         assert result.data is not None
-        assert result.data["pokemonByPokedexNumber"] == {
-            "id": "UG9rZW1vbjox",
-            "nationalPokedexNumber": 1,
-            "name": "フシギダネ",
-            "hp": 45,
-            "attack": 49,
-            "defense": 49,
-            "specialAttack": 65,
-            "specialDefense": 65,
-            "speed": 45,
-            "baseTotal": 318,
-            "types": [
-                {
-                    "pokemonType": {"id": "UG9rZW1vblR5cGU6NQ==", "typeName": "くさ"},
-                    "slot": 1,
-                },
-                {
-                    "pokemonType": {"id": "UG9rZW1vblR5cGU6OA==", "typeName": "どく"},
-                    "slot": 2,
-                },
-            ],
-            "abilities": [
-                {
-                    "pokemonAbility": {
-                        "id": "UG9rZW1vbkFiaWxpdHk6MzQ=",
-                        "abilityName": "ようりょくそ",
-                    },
-                    "slot": 3,
-                    "isHidden": True,
-                },
-                {
-                    "pokemonAbility": {
-                        "id": "UG9rZW1vbkFiaWxpdHk6NjU=",
-                        "abilityName": "しんりょく",
-                    },
-                    "slot": 1,
-                    "isHidden": False,
-                },
-            ],
-        }
+        assert result.data["pokemonByPokedexNumber"] == TEST_RESPONSE_OF_POKEMON
+
+    def test_pokemon_by_name_query(self) -> None:
+        query = """
+            query testPokemonByName($name: String!) {
+                pokemonByName(name: $name) {
+                    id
+                    nationalPokedexNumber
+                    name
+                    hp
+                    attack
+                    defense
+                    specialAttack
+                    specialDefense
+                    speed
+                    baseTotal
+                    types {
+                        pokemonType {
+                        id
+                        typeName
+                        }
+                        slot
+                    }
+                    abilities {
+                        pokemonAbility {
+                        id
+                        abilityName
+                        }
+                        slot
+                        isHidden
+                    }
+                }
+            }
+        """
+
+        schema = Schema(query=Query)
+        result = schema.execute_sync(
+            query, variable_values={"name": "フシギダネ"}, context_value=get_context()
+        )
+
+        assert result.errors is None
+        assert result.data is not None
+        assert result.data["pokemonByName"] == TEST_RESPONSE_OF_POKEMON
 
     def test_pokemons_query(self) -> None:
         query = """

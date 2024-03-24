@@ -23,3 +23,24 @@ def get_pokemon_by_pokedex_number(pokedex_number: int, info: Info) -> Pokemon | 
         return None
 
     return Pokemon.from_entity(pokemon)
+
+
+def get_pokemon_by_name(name: str, info: Info) -> Pokemon | None:
+    """Retrieves a Pokemon by name.
+
+    Args:
+        name (str): The Pokemon name.
+        info (Info): The query info.
+
+    Returns:
+        Pokemon | None: The result of the operation.
+
+    """
+    container = info.context.get("container")
+    service = container.get(PokemonService)
+    pokemon = service.get_by_name(name)
+
+    if pokemon is None:
+        return None
+
+    return Pokemon.from_entity(pokemon)
