@@ -40,6 +40,30 @@ class PokemonService(PokemonServiceABC):
         """
         return self._repo.get_by_id(id_)
 
+    def get_by_pokedex_number(self, pokedex_number: int) -> Pokemon | None:
+        """Retrieve a Pokémon by its Pokédex number.
+
+        Args:
+            pokedex_number (int): The Pokédex number of the Pokémon to retrieve.
+
+        Returns:
+            Pokemon | None: The Pokémon with the specified Pokédex number, or None if not found.
+
+        """
+        return self._repo.get_by_pokedex_number(pokedex_number)
+
+    def get_by_name(self, name: str) -> Pokemon | None:
+        """Retrieve a Pokémon by its name.
+
+        Args:
+            name (str): The name of the Pokémon to retrieve.
+
+        Returns:
+            Pokemon | None: The Pokémon with the specified name, or None if not found.
+
+        """
+        return self._repo.get_by_name(name)
+
     def get_all(self) -> list[Pokemon]:
         """Retrieve all Pokémon from the repository.
 

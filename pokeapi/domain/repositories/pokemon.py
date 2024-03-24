@@ -42,6 +42,32 @@ class PokemonRepositoryABC(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
+    def get_by_pokedex_number(self, pokedex_number: int) -> PokemonEntity | None:
+        """Retrieve an entity by its pokedex number.
+
+        Args:
+            pokedex_number (int): The pokedex number of the entity to retrieve.
+
+        Returns:
+            Pokemon | None: The entity with the specified pokedex number, or None if not found.
+
+        """
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_by_name(self, name: str) -> PokemonEntity | None:
+        """Retrieve an entity by its name.
+
+        Args:
+            name (str): The name of the entity to retrieve.
+
+        Returns:
+            Pokemon | None: The entity with the specified name, or None if not found.
+
+        """
+        pass  # pragma: no cover
+
+    @abstractmethod
     def get_all(self) -> list[PokemonEntity]:
         """Retrieve all entities from the repository.
 

@@ -6,21 +6,31 @@ scalar GlobalID
 """
 Root Query.
 """
-type query {
+type Query {
   """
   Returns a Pokémon resource by ID.
   """
-  Pokemon(id: ID!): Pokemon!
+  pokemon(id: ID!): Pokemon!
 
   """
   List of Pokémon.
   """
-  pokemos(
+  pokemons(
     before: String
     after: String
     first: Int
     last: Int
   ): PokemonConnection!
+
+  """
+  Returns a Pokémon resource by National Pokédex number.
+  """
+  pokemonByPokedexNumber(pokedexNumber: Int!): Pokemon
+
+  """
+  Returns a Pokémon resource by name.
+  """
+  pokemonByName(name: String!): Pokemon
 
   """
   Returns a Pokémon type by ID.
@@ -41,11 +51,11 @@ type query {
 """
 Root Mutation.
 """
-type mutation {
+type Mutation {
   """
   Authenticates a user and returns a token.
   """
-  auth: AuthPayload!
+  auth(input: UserInput!): AuthPayload!
 
   """
   Refreshes a token.
@@ -105,7 +115,7 @@ type Pokemon implements Node {
   """
   The National Pokédex number of this Pokémon.
   """
-  national_pokedex_number: Int!
+  nationalPokedexNumber: Int!
 
   """
   The name of this Pokémon.
@@ -150,12 +160,12 @@ type Pokemon implements Node {
   """
   Type of this Pokémon.
   """
-  Types: [PokemonsType!]!
+  types: [PokemonsType!]!
 
   """
   Ability of this Pokémon.
   """
-  Abilities: [PokemonsAbility!]!
+  abilities: [PokemonsAbility!]!
 }
 
 """
