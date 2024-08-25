@@ -5,7 +5,7 @@ from pokeapi.application.services.pokemon_type import TypeService
 from tests.conftest import TEST_POKEMON_TYPE_ENTITY
 
 
-@pytest.fixture()
+@pytest.fixture
 def service(container: Injector) -> TypeService:
     return container.get(TypeService)
 

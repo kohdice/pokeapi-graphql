@@ -29,7 +29,7 @@ def repo(container: Injector) -> TokenWhitelistRepository:
     return container.get(TokenWhitelistRepository)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_session() -> MagicMock:
     return MagicMock(spec=Session)
 
@@ -54,7 +54,7 @@ def setup_user(container: Injector) -> Generator:
     session.commit()
 
 
-@pytest.fixture()
+@pytest.fixture
 def setup_token_whitelist(
     container: Injector,
     setup_user: int,
@@ -84,7 +84,7 @@ def setup_token_whitelist(
     session.commit()
 
 
-@pytest.fixture()
+@pytest.fixture
 def _teardown_for_create(container: Injector, setup_user: int) -> Generator:
     yield
 

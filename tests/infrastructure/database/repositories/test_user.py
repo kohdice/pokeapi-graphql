@@ -17,12 +17,12 @@ def repo(container: Injector) -> UserRepository:
     return container.get(UserRepository)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_session() -> MagicMock:
     return MagicMock(spec=Session)
 
 
-@pytest.fixture()
+@pytest.fixture
 def setup_for_user(container: Injector) -> Generator:
     session = container.get(Session)
     record = session.execute(
@@ -44,7 +44,7 @@ def setup_for_user(container: Injector) -> Generator:
     session.commit()
 
 
-@pytest.fixture()
+@pytest.fixture
 def _teardown_for_create(container: Injector) -> Generator:
     yield
 

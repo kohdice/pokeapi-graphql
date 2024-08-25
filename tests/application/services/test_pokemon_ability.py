@@ -5,7 +5,7 @@ from pokeapi.application.services.pokemon_ability import AbilityService
 from tests.conftest import TEST_POKEMON_ABILITY_ENTITY
 
 
-@pytest.fixture()
+@pytest.fixture
 def service(container: Injector) -> AbilityService:
     return container.get(AbilityService)
 

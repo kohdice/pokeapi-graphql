@@ -11,7 +11,7 @@ from pokeapi.exceptions.config import (
 
 
 class TestAppConfig:
-    @pytest.fixture()
+    @pytest.fixture
     def config(self) -> AppConfig:
         return AppConfig()
 
