@@ -24,12 +24,12 @@ jobs:
           echo Branch: ${{ github.head_ref }}
       - name: Build Container
         run: |
-          docker-compose up -d --build
+          docker compose up -d --build
       - name: Wait for pokeapi to start
         run: sleep 30s
       - name: Run pytest
         run: |
-          docker-compose exec -T app poetry run pytest --cov=. --cov-branch --cov-report=xml
+          docker compose exec -T app poetry run pytest --cov=. --cov-branch --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
