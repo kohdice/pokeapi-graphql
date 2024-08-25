@@ -5,7 +5,7 @@ from pokeapi.application.services.pokemon import PokemonService
 from tests.conftest import TEST_POKEMON_ENTITY
 
 
-@pytest.fixture()
+@pytest.fixture
 def service(container: Injector) -> PokemonService:
     return container.get(PokemonService)
 

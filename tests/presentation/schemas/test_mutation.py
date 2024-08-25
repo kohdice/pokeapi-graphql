@@ -16,7 +16,7 @@ from pokeapi.presentation.schemas.query import Query
 from tests.conftest import EXECUTION_DATETIME, ISSUE_DATETIME, TEST_UUID, MockRequest
 
 
-@pytest.fixture()
+@pytest.fixture
 def _setup_for_token(container: Injector) -> Generator:
     session = container.get(Session)
     record = session.execute(
@@ -43,7 +43,7 @@ def _setup_for_token(container: Injector) -> Generator:
     session.commit()
 
 
-@pytest.fixture()
+@pytest.fixture
 def _teardown_for_token(container: Injector) -> Generator:
     yield
 
@@ -52,7 +52,7 @@ def _teardown_for_token(container: Injector) -> Generator:
     session.commit()
 
 
-@pytest.fixture()
+@pytest.fixture
 def _teardown_for_create_user(container: Injector) -> Generator:
     yield
 
