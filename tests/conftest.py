@@ -311,7 +311,7 @@ def mock_refresh_info(
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def _setup_token_whitelist_for_user(
     container: Injector,
 ) -> Generator:

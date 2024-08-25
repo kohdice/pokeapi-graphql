@@ -13,7 +13,7 @@ from tests.conftest import (
 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def service(container: Injector) -> UserService:
     return container.get(UserService)
 
